@@ -1,5 +1,6 @@
 package com.aparigraha.tuple;
 
+import com.aparigraha.tuple.generator.TupleGenerationParams;
 import com.aparigraha.tuple.generator.TupleGenerator;
 import com.aparigraha.tuple.generator.TupleSchemaWriter;
 import org.junit.jupiter.api.Test;
@@ -39,24 +40,37 @@ class TupleSpecProcessorTest {
     void shouldGenerateTuplesWhenAnnotationsAreAreDefinedAcrossMultipleElements() throws IOException {
         var tupleSpec1 = mock(TupleSpec.class);
         when(tupleSpec1.value())
-                .thenReturn(new int[] {4});
+                .thenReturn(new int[] {2, 4});
 
         var element1 = mock(VariableElement.class);
         when(element1.getAnnotation(TupleSpec.class)).thenReturn(tupleSpec1);
 
-        when(tupleGenerator.generate(
-                argThat(params -> Objects.equals(params.className(), "Tuple4") &&
-                        Objects.equals(params.packageName(), "com.aparigraha.tuples") &&
-                        Objects.equals(params.fields(), List.of("item0", "item1", "item2", "item3"))
-                )
-        )).thenReturn("Tuple code");
+        when(tupleGenerator.generate(any())).thenAnswer(invocation -> {
+            TupleGenerationParams params = invocation.getArgument(0);
+
+            if ("Tuple4".equals(params.className()) &&
+                    "com.aparigraha.tuples".equals(params.packageName()) &&
+                    Objects.equals(params.fields(), List.of("item0", "item1", "item2", "item3"))
+            ) {
+                return "Tuple code for Tuple4";
+            }
+            else if ("Tuple2".equals(params.className()) &&
+                    "com.aparigraha.tuples".equals(params.packageName()) &&
+                    Objects.equals(params.fields(), List.of("item0", "item1"))
+            ) {
+                return "Tuple code for Tuple2";
+            }
+            else return null;
+        });
 
         doReturn(Set.of(element1))
                 .when(roundEnvironment)
                 .getElementsAnnotatedWith(TupleSpec.class);
 
 
-        when(tupleSchemaWriter.write(eq("Tuple code"), eq("com.aparigraha.tuples.Tuple4"), any()))
+        when(tupleSchemaWriter.write(eq("Tuple code for Tuple4"), eq("com.aparigraha.tuples.Tuple4"), any()))
+                .thenReturn(true);
+        when(tupleSchemaWriter.write(eq("Tuple code for Tuple2"), eq("com.aparigraha.tuples.Tuple2"), any()))
                 .thenReturn(true);
 
         TupleSpecProcessor tupleSpecProcessor = new TupleSpecProcessor(tupleGenerator, tupleSchemaWriter);
