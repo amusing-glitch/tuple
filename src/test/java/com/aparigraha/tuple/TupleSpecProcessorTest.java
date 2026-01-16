@@ -186,7 +186,7 @@ class TupleSpecProcessorTest {
 
 
     @Test
-    void shouldReturnFalseAndShortCircuitWhenOneOfTheGenerationFails() throws IOException {
+    void shouldHandleGenerationFails() throws IOException {
         var tupleSpec1 = mock(TupleSpec.class);
         when(tupleSpec1.value())
                 .thenReturn(new int[] {2, 4});
@@ -225,11 +225,12 @@ class TupleSpecProcessorTest {
 
         assertTrue(tupleSpecProcessor.process(Set.of(), roundEnvironment));
         verify(tupleSchemaWriter).write(eq("Tuple code for Tuple2"), eq("com.aparigraha.tuples.Tuple2"), any());
+        verify(tupleSchemaWriter, times(0)).write(eq("Tuple code for Tuple4"), eq("com.aparigraha.tuples.Tuple4"), any());
     }
 
 
     @Test
-    void shouldReturnFalseAndShortCircuitWhenOneOfTheFileWriteFails() throws IOException {
+    void shouldHandleFileWriteFails() throws IOException {
         var tupleSpec1 = mock(TupleSpec.class);
         when(tupleSpec1.value())
                 .thenReturn(new int[] {2, 4});
@@ -263,6 +264,11 @@ class TupleSpecProcessorTest {
             else return null;
         });
 
+        doThrow(new IOException())
+                .when(tupleSchemaWriter).write(eq("Tuple code for Tuple4"), eq("com.aparigraha.tuples.Tuple4"), any());
+        doAnswer(invocationOnMock -> null)
+                .when(tupleSchemaWriter).write(eq("Tuple code for Tuple2"), eq("com.aparigraha.tuples.Tuple2"), any());
+
         doReturn(Set.of(element1))
                 .when(roundEnvironment)
                 .getElementsAnnotatedWith(TupleSpec.class);
@@ -271,5 +277,6 @@ class TupleSpecProcessorTest {
 
         assertTrue(tupleSpecProcessor.process(Set.of(), roundEnvironment));
         verify(tupleSchemaWriter).write(eq("Tuple code for Tuple2"), eq("com.aparigraha.tuples.Tuple2"), any());
+        verify(tupleSchemaWriter).write(eq("Tuple code for Tuple4"), eq("com.aparigraha.tuples.Tuple4"), any());
     }
 }
