@@ -38,7 +38,7 @@ class ZipperTest {
 
 
     @Test
-    void shouldZipWithTypeSafeWrapper() {
+    void shouldZipWithNumberedTuple() {
         var ids =  Stream.of(0, 1, 2, 3);
         var names = Stream.of("A", "B", "C");
         var ids1 =  Stream.of(0, 1, 2, 3);
@@ -49,6 +49,22 @@ class ZipperTest {
         assertEquals(new Tuple4<>(0, "A", 0, "A"), zipped.get(0));
         assertEquals(new Tuple4<>(1, "B", 1, "B"), zipped.get(1));
         assertEquals(new Tuple4<>(2, "C", 2, "C"), zipped.get(2));
+        assertEquals(3, zipped.size());
+    }
+
+
+    @Test
+    void shouldZipWithNamedTuple() {
+        var ids =  Stream.of(0, 1, 2, 3);
+        var names = Stream.of("A", "B", "C");
+        var age =  Stream.of(12, 13, 12, 14);
+        var isDayScholar = Stream.of(false, true, false);
+
+        var zipped = StudentInfo.zip(ids, names, age, isDayScholar).toList();
+
+        assertEquals(new StudentInfo<>(0, "A", 12, false), zipped.get(0));
+        assertEquals(new StudentInfo<>(1, "B", 13, true), zipped.get(1));
+        assertEquals(new StudentInfo<>(2, "C", 12, false), zipped.get(2));
         assertEquals(3, zipped.size());
     }
 }

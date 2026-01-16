@@ -1,9 +1,5 @@
 package com.aparigraha.tuple;
 
-import io.pebbletemplates.pebble.PebbleEngine;
-import io.pebbletemplates.pebble.loader.ClasspathLoader;
-import io.pebbletemplates.pebble.template.PebbleTemplate;
-
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
@@ -14,19 +10,13 @@ import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Set;
 
 
 @SupportedAnnotationTypes("com.aparigraha.tuple.TupleSpec")
 @SupportedSourceVersion(SourceVersion.RELEASE_21)
 public class TupleSpecProcessor extends AbstractProcessor {
-    private static final PebbleTemplate template = getTemplate();
-
-
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         return roundEnv.getElementsAnnotatedWith(TupleSpec.class)
@@ -38,19 +28,15 @@ public class TupleSpecProcessor extends AbstractProcessor {
     }
 
 
-    private static PebbleTemplate getTemplate() {
-        ClasspathLoader loader = new ClasspathLoader();
-        loader.setPrefix("templates");
-        PebbleEngine engine = new PebbleEngine.Builder().strictVariables(true).loader(loader).build();
-        return engine.getTemplate("Tuple.peb");
-    }
-
-
     private String generateTuple(int size) {
-        Writer writer = new StringWriter();
         try {
-            template.evaluate(writer, Map.of("size", size));
-            return writer.toString();
+            TupleGenerator tupleGenerator = new TupleGenerator(
+                    "com.aparigraha.tuples",
+                    "Tuple" + size,
+                    "item",
+                    size
+            );
+            return tupleGenerator.generate();
         } catch (IOException exception) {
             processingEnv.getMessager().printMessage(
                     Diagnostic.Kind.ERROR,
