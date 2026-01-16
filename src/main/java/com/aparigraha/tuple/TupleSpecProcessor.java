@@ -17,6 +17,17 @@ import java.util.Set;
 @SupportedAnnotationTypes("com.aparigraha.tuple.TupleSpec")
 @SupportedSourceVersion(SourceVersion.RELEASE_21)
 public class TupleSpecProcessor extends AbstractProcessor {
+    private final TupleGenerator tupleGenerator;
+
+    public TupleSpecProcessor(TupleGenerator tupleGenerator) {
+        this.tupleGenerator = tupleGenerator;
+    }
+
+    public TupleSpecProcessor() {
+        this(new TupleGenerator());
+    }
+
+
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         return roundEnv.getElementsAnnotatedWith(TupleSpec.class)
@@ -30,13 +41,12 @@ public class TupleSpecProcessor extends AbstractProcessor {
 
     private String generateTuple(int size) {
         try {
-            TupleGenerator tupleGenerator = new TupleGenerator(
+            return tupleGenerator.generate(
                     "com.aparigraha.tuples",
                     "Tuple" + size,
                     "item",
                     size
             );
-            return tupleGenerator.generate();
         } catch (IOException exception) {
             processingEnv.getMessager().printMessage(
                     Diagnostic.Kind.ERROR,

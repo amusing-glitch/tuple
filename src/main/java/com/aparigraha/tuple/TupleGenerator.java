@@ -13,10 +13,6 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class TupleGenerator {
-    private final String packageName;
-    private final String className;
-    private final List<String> fields;
-
     private static final String genericsPrefix = "T";
     private static final String wildcard = "?";
     private static final String tupleEqualsParameter = "that";
@@ -25,83 +21,74 @@ public class TupleGenerator {
     private static final PebbleTemplate template = getTemplate();
 
 
-    public TupleGenerator(String packageName, String className, List<String> fields) {
-        this.packageName = packageName;
-        this.className = className;
-        this.fields = fields;
+    public String generate(String packageName, String className, List<String> fields) throws IOException {
+        Writer writer = new StringWriter();
+        template.evaluate(writer, templateParams(packageName, className, fields));
+        return writer.toString();
     }
 
-    public TupleGenerator(String packageName, String className, String fieldPrefix, int fieldCount) {
-        this(
+    public String generate(String packageName, String className, String fieldPrefix, int fieldCount) throws IOException {
+        return generate(
                 packageName,
                 className,
                 range(fieldCount).map(index -> fieldPrefix + index).toList()
         );
     }
 
-    public String generate() throws IOException {
-        Writer writer = new StringWriter();
-        template.evaluate(writer, templateParams());
-        return writer.toString();
-    }
-
-    private Map<String, Object> templateParams() {
+    private static Map<String, Object> templateParams(String packageName, String className, List<String> fields) {
+        int size = fields.size();
         return Map.of(
                 "packageName", packageName,
                 "className", className,
-                "genericsSequence", genericsSequence(),
-                "fields", fields(),
+                "genericsSequence", genericsSequence(size),
+                "fields", fields(fields),
                 "equalsMethod", Map.of(
-                        "wildcardGenericSequence", wildcardGenericSequence(),
+                        "wildcardGenericSequence", wildcardGenericSequence(size),
                         "tupleEqualsParameter", tupleEqualsParameter,
-                        "tupleEqualsCondition", tupleEqualsCondition()
+                        "tupleEqualsCondition", tupleEqualsCondition(fields)
                 ),
                 "zipMethod", Map.of(
-                        "zipParameters", zipParameters(),
-                        "objectStreamSequence", objectStreamSequence(),
+                        "zipParameters", zipParameters(size),
+                        "objectStreamSequence", objectStreamSequence(size),
                         "listToTupleParameter", listToTupleParameter,
-                        "listToTupleSequence", listToTupleSequence()
+                        "listToTupleSequence", listToTupleSequence(size)
                 )
         );
     }
 
-    private String genericsSequence() {
-        return csvOf(generics());
+    private static String genericsSequence(int size) {
+        return csvOf(generics(size));
     }
 
-    private Stream<String> generics() {
-        return range().map(index -> genericsPrefix + index);
+    private static String fields(List<String> fields) {
+        var generics = generics(fields.size()).toList();
+        return csvOf(range(fields.size()).map(index -> "%s %s".formatted(generics.get(index), fields.get(index))));
     }
 
-    private String fields() {
-        var generics = generics().toList();
-        return csvOf(range().map(index -> "%s %s".formatted(generics.get(index), fields.get(index))));
+    private static Stream<String> generics(int size) {
+        return range(size).map(index -> genericsPrefix + index);
     }
 
-    private String wildcardGenericSequence() {
-        return csvOf(Stream.generate(() -> wildcard).limit(fields.size()));
+    private static String wildcardGenericSequence(int size) {
+        return csvOf(Stream.generate(() -> wildcard).limit(size));
     }
 
-    private String tupleEqualsCondition() {
+    private static String tupleEqualsCondition(List<String> fields) {
         return logicalAndOf(
                 fields.stream().map(field -> "this.%s == %s.%s".formatted(field, tupleEqualsParameter, field))
         );
     }
 
-    private String zipParameters() {
-        return csvOf(range().map(index -> "Stream<T%d> stream%d".formatted(index, index)));
+    private static String zipParameters(int size) {
+        return csvOf(range(size).map(index -> "Stream<T%d> stream%d".formatted(index, index)));
     }
 
-    private String objectStreamSequence() {
-        return csvOf(range().map("(Stream<Object>) stream%d"::formatted));
+    private static String objectStreamSequence(int size) {
+        return csvOf(range(size).map("(Stream<Object>) stream%d"::formatted));
     }
 
-    private String listToTupleSequence() {
-        return csvOf(range().map(index -> "(%s%d) %s.get(%d)".formatted(genericsPrefix, index, listToTupleParameter, index)));
-    }
-
-    private Stream<Integer> range() {
-        return range(fields.size());
+    private static String listToTupleSequence(int size) {
+        return csvOf(range(size).map(index -> "(%s%d) %s.get(%d)".formatted(genericsPrefix, index, listToTupleParameter, index)));
     }
 
     private static Stream<Integer> range(int size) {

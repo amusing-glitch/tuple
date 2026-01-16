@@ -10,11 +10,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class TupleGeneratorTest {
     @Test
     void shouldGenerateStudentInfoClassWithGivenFields() throws IOException {
-        TupleGenerator tupleGenerator = new TupleGenerator(
-                "com.aparigraha.tuples",
-                "StudentInfo",
-                List.of("id", "name", "age", "isDayScholar")
-        );
+        TupleGenerator tupleGenerator = new TupleGenerator();
 
         var expected = """
         package com.aparigraha.tuples;
@@ -42,18 +38,17 @@ class TupleGeneratorTest {
         }
         """.trim();
 
-        assertEquals(expected, tupleGenerator.generate());
+        assertEquals(expected, tupleGenerator.generate(
+                "com.aparigraha.tuples",
+                "StudentInfo",
+                List.of("id", "name", "age", "isDayScholar")
+        ));
     }
 
 
     @Test
     void shouldGenerateTupleClassWith4Fields() throws IOException {
-        TupleGenerator tupleGenerator = new TupleGenerator(
-                "com.aparigraha.tuples",
-                "Tuple4",
-                "item",
-                4
-        );
+        TupleGenerator tupleGenerator = new TupleGenerator();
         var expected = """
         package com.aparigraha.tuples;
         
@@ -80,6 +75,11 @@ class TupleGeneratorTest {
         }
         """.trim();
 
-        assertEquals(expected, tupleGenerator.generate());
+        assertEquals(expected, tupleGenerator.generate(
+                "com.aparigraha.tuples",
+                "Tuple4",
+                "item",
+                4
+        ));
     }
 }
