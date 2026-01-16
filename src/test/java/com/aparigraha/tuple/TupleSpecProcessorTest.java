@@ -162,4 +162,87 @@ class TupleSpecProcessorTest {
 
         assertTrue(tupleSpecProcessor.process(Set.of(), roundEnvironment));
     }
+
+
+    @Test
+    void shouldReturnFalseAndShortCircuitWhenOneOfTheGenerationFails() throws IOException {
+        var tupleSpec1 = mock(TupleSpec.class);
+        when(tupleSpec1.value())
+                .thenReturn(new int[] {2, 4});
+
+        var element1 = mock(VariableElement.class);
+        when(element1.getAnnotation(TupleSpec.class)).thenReturn(tupleSpec1);
+
+
+        when(tupleGenerator.generate(any())).thenAnswer(invocation -> {
+            TupleGenerationParams params = invocation.getArgument(0);
+
+            if ("Tuple4".equals(params.className()) &&
+                    "com.aparigraha.tuples".equals(params.packageName()) &&
+                    Objects.equals(params.fields(), List.of("item0", "item1", "item2", "item3"))
+            ) {
+                return null;
+            }
+            else if ("Tuple2".equals(params.className()) &&
+                    "com.aparigraha.tuples".equals(params.packageName()) &&
+                    Objects.equals(params.fields(), List.of("item0", "item1"))
+            ) {
+                return "Tuple code for Tuple2";
+            }
+            else return null;
+        });
+
+        doReturn(Set.of(element1))
+                .when(roundEnvironment)
+                .getElementsAnnotatedWith(TupleSpec.class);
+
+
+        when(tupleSchemaWriter.write(eq("Tuple code for Tuple2"), eq("com.aparigraha.tuples.Tuple2"), any()))
+                .thenReturn(true);
+
+        TupleSpecProcessor tupleSpecProcessor = new TupleSpecProcessor(tupleGenerator, tupleSchemaWriter);
+
+        assertFalse(tupleSpecProcessor.process(Set.of(), roundEnvironment));
+    }
+
+
+    @Test
+    void shouldReturnFalseAndShortCircuitWhenOneOfTheFileWriteFails() throws IOException {
+        var tupleSpec1 = mock(TupleSpec.class);
+        when(tupleSpec1.value())
+                .thenReturn(new int[] {2, 4});
+
+        var element1 = mock(VariableElement.class);
+        when(element1.getAnnotation(TupleSpec.class)).thenReturn(tupleSpec1);
+
+        when(tupleGenerator.generate(any())).thenAnswer(invocation -> {
+            TupleGenerationParams params = invocation.getArgument(0);
+
+            if ("Tuple4".equals(params.className()) &&
+                    "com.aparigraha.tuples".equals(params.packageName()) &&
+                    Objects.equals(params.fields(), List.of("item0", "item1", "item2", "item3"))
+            ) {
+                return "Tuple code for Tuple4";
+            }
+            else if ("Tuple2".equals(params.className()) &&
+                    "com.aparigraha.tuples".equals(params.packageName()) &&
+                    Objects.equals(params.fields(), List.of("item0", "item1"))
+            ) {
+                return "Tuple code for Tuple2";
+            }
+            else return null;
+        });
+
+        doReturn(Set.of(element1))
+                .when(roundEnvironment)
+                .getElementsAnnotatedWith(TupleSpec.class);
+
+
+        when(tupleSchemaWriter.write(eq("Tuple code for Tuple2"), eq("com.aparigraha.tuples.Tuple2"), any()))
+                .thenReturn(false);
+
+        TupleSpecProcessor tupleSpecProcessor = new TupleSpecProcessor(tupleGenerator, tupleSchemaWriter);
+
+        assertFalse(tupleSpecProcessor.process(Set.of(), roundEnvironment));
+    }
 }
