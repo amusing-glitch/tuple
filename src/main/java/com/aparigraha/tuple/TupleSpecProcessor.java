@@ -40,7 +40,7 @@ public class TupleSpecProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        return roundEnv.getElementsAnnotatedWith(TupleSpec.class)
+        roundEnv.getElementsAnnotatedWith(TupleSpec.class)
                 .stream()
                 .map(element -> element.getAnnotation(TupleSpec.class))
                 .flatMap(tupleSpec -> Arrays.stream(tupleSpec.value()).boxed())
@@ -52,29 +52,43 @@ public class TupleSpecProcessor extends AbstractProcessor {
                         size
                 ))
                 .map(this::generateTuple)
-                .allMatch(this::saveTupleSchema);
+                .forEach(this::saveTupleSchema);
+        return true;
     }
+
 
     private TupleSchema generateTuple(TupleGenerationParams params) {
         try {
             return tupleGenerator.generate(params);
         } catch (IOException exception) {
-            processingEnv.getMessager().printMessage(
-                    Diagnostic.Kind.ERROR,
-                    "Failed creating tuple: \"%s.%s\". Exception: %s".formatted(
-                            params.packageName(),
-                            params.className(),
-                            exception.getMessage()
-                    )
-            );
+            if (processingEnv != null)
+                processingEnv.getMessager().printMessage(
+                        Diagnostic.Kind.ERROR,
+                        "Failed creating tuple: \"%s.%s\". Exception: %s".formatted(
+                                params.packageName(),
+                                params.className(),
+                                exception.getMessage()
+                        )
+                );
+            return null;
         }
-        return null;
     }
 
-    private boolean saveTupleSchema(TupleSchema tupleSchema) {
-        if (tupleSchema == null) {
-            return false;
+
+    private void saveTupleSchema(TupleSchema tupleSchema) {
+        if (tupleSchema == null) return;
+        try {
+            tupleSchemaWriter.write(tupleSchema.javaCode(), tupleSchema.completeClassName(), processingEnv);
+        } catch (IOException exception) {
+            if (processingEnv != null)
+                processingEnv.getMessager().printMessage(
+                        Diagnostic.Kind.ERROR,
+                        "Failed creating tuple: \"%s.%s\". Exception: %s".formatted(
+                                tupleSchema.packageName(),
+                                tupleSchema.className(),
+                                exception.getMessage()
+                        )
+                );
         }
-        return tupleSchemaWriter.write(tupleSchema.javaCode(), tupleSchema.completeClassName(), processingEnv);
     }
 }

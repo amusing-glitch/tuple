@@ -99,19 +99,13 @@ class TupleSpecProcessorTest {
                 .when(roundEnvironment)
                 .getElementsAnnotatedWith(TupleSpec.class);
 
-
-        when(tupleSchemaWriter.write(eq("Tuple code for Tuple4"), eq("com.aparigraha.tuples.Tuple4"), any()))
-                .thenReturn(true);
-        when(tupleSchemaWriter.write(eq("Tuple code for Tuple2"), eq("com.aparigraha.tuples.Tuple2"), any()))
-                .thenReturn(true);
-        when(tupleSchemaWriter.write(eq("Tuple code for Tuple3"), eq("com.aparigraha.tuples.Tuple3"), any()))
-                .thenReturn(true);
-        when(tupleSchemaWriter.write(eq("Tuple code for Tuple1"), eq("com.aparigraha.tuples.Tuple1"), any()))
-                .thenReturn(true);
-
         TupleSpecProcessor tupleSpecProcessor = new TupleSpecProcessor(tupleGenerator, tupleSchemaWriter);
 
         assertTrue(tupleSpecProcessor.process(Set.of(), roundEnvironment));
+        verify(tupleSchemaWriter).write(eq("Tuple code for Tuple4"), eq("com.aparigraha.tuples.Tuple4"), any());
+        verify(tupleSchemaWriter).write(eq("Tuple code for Tuple2"), eq("com.aparigraha.tuples.Tuple2"), any());
+        verify(tupleSchemaWriter).write(eq("Tuple code for Tuple3"), eq("com.aparigraha.tuples.Tuple3"), any());
+        verify(tupleSchemaWriter).write(eq("Tuple code for Tuple1"), eq("com.aparigraha.tuples.Tuple1"), any());
     }
 
 
@@ -181,19 +175,13 @@ class TupleSpecProcessorTest {
                 .when(roundEnvironment)
                 .getElementsAnnotatedWith(TupleSpec.class);
 
-
-        when(tupleSchemaWriter.write(eq("Tuple code for Tuple4"), eq("com.aparigraha.tuples.Tuple4"), any()))
-                .thenReturn(true);
-        when(tupleSchemaWriter.write(eq("Tuple code for Tuple2"), eq("com.aparigraha.tuples.Tuple2"), any()))
-                .thenReturn(true);
-        when(tupleSchemaWriter.write(eq("Tuple code for Tuple3"), eq("com.aparigraha.tuples.Tuple3"), any()))
-                .thenReturn(true);
-        when(tupleSchemaWriter.write(eq("Tuple code for Tuple1"), eq("com.aparigraha.tuples.Tuple1"), any()))
-                .thenReturn(true);
-
         TupleSpecProcessor tupleSpecProcessor = new TupleSpecProcessor(tupleGenerator, tupleSchemaWriter);
 
         assertTrue(tupleSpecProcessor.process(Set.of(), roundEnvironment));
+        verify(tupleSchemaWriter).write(eq("Tuple code for Tuple4"), eq("com.aparigraha.tuples.Tuple4"), any());
+        verify(tupleSchemaWriter).write(eq("Tuple code for Tuple2"), eq("com.aparigraha.tuples.Tuple2"), any());
+        verify(tupleSchemaWriter).write(eq("Tuple code for Tuple3"), eq("com.aparigraha.tuples.Tuple3"), any());
+        verify(tupleSchemaWriter).write(eq("Tuple code for Tuple1"), eq("com.aparigraha.tuples.Tuple1"), any());
     }
 
 
@@ -214,7 +202,7 @@ class TupleSpecProcessorTest {
                     "com.aparigraha.tuples".equals(params.packageName()) &&
                     Objects.equals(params.fields(), List.of("item0", "item1", "item2", "item3"))
             ) {
-                return null;
+                throw new IOException();
             }
             else if ("Tuple2".equals(params.className()) &&
                     "com.aparigraha.tuples".equals(params.packageName()) &&
@@ -233,13 +221,10 @@ class TupleSpecProcessorTest {
                 .when(roundEnvironment)
                 .getElementsAnnotatedWith(TupleSpec.class);
 
-
-        when(tupleSchemaWriter.write(eq("Tuple code for Tuple2"), eq("com.aparigraha.tuples.Tuple2"), any()))
-                .thenReturn(true);
-
         TupleSpecProcessor tupleSpecProcessor = new TupleSpecProcessor(tupleGenerator, tupleSchemaWriter);
 
-        assertFalse(tupleSpecProcessor.process(Set.of(), roundEnvironment));
+        assertTrue(tupleSpecProcessor.process(Set.of(), roundEnvironment));
+        verify(tupleSchemaWriter).write(eq("Tuple code for Tuple2"), eq("com.aparigraha.tuples.Tuple2"), any());
     }
 
 
@@ -282,12 +267,9 @@ class TupleSpecProcessorTest {
                 .when(roundEnvironment)
                 .getElementsAnnotatedWith(TupleSpec.class);
 
-
-        when(tupleSchemaWriter.write(eq("Tuple code for Tuple2"), eq("com.aparigraha.tuples.Tuple2"), any()))
-                .thenReturn(false);
-
         TupleSpecProcessor tupleSpecProcessor = new TupleSpecProcessor(tupleGenerator, tupleSchemaWriter);
 
-        assertFalse(tupleSpecProcessor.process(Set.of(), roundEnvironment));
+        assertTrue(tupleSpecProcessor.process(Set.of(), roundEnvironment));
+        verify(tupleSchemaWriter).write(eq("Tuple code for Tuple2"), eq("com.aparigraha.tuples.Tuple2"), any());
     }
 }
