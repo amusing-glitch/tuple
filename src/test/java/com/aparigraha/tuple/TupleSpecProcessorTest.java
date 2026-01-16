@@ -2,6 +2,7 @@ package com.aparigraha.tuple;
 
 import com.aparigraha.tuple.generator.TupleGenerationParams;
 import com.aparigraha.tuple.generator.TupleGenerator;
+import com.aparigraha.tuple.generator.TupleSchema;
 import com.aparigraha.tuple.generator.TupleSchemaWriter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -55,25 +56,41 @@ class TupleSpecProcessorTest {
                     "com.aparigraha.tuples".equals(params.packageName()) &&
                     Objects.equals(params.fields(), List.of("item0", "item1", "item2", "item3"))
             ) {
-                return "Tuple code for Tuple4";
+                return new TupleSchema(
+                        "com.aparigraha.tuples",
+                        "Tuple4",
+                        "Tuple code for Tuple4"
+                );
             }
             else if ("Tuple2".equals(params.className()) &&
                     "com.aparigraha.tuples".equals(params.packageName()) &&
                     Objects.equals(params.fields(), List.of("item0", "item1"))
             ) {
-                return "Tuple code for Tuple2";
+                return new TupleSchema(
+                        "com.aparigraha.tuples",
+                        "Tuple2",
+                        "Tuple code for Tuple2"
+                );
             }
             else if ("Tuple3".equals(params.className()) &&
                     "com.aparigraha.tuples".equals(params.packageName()) &&
                     Objects.equals(params.fields(), List.of("item0", "item1", "item2"))
             ) {
-                return "Tuple code for Tuple3";
+                return new TupleSchema(
+                        "com.aparigraha.tuples",
+                        "Tuple3",
+                        "Tuple code for Tuple3"
+                );
             }
             else if ("Tuple1".equals(params.className()) &&
                     "com.aparigraha.tuples".equals(params.packageName()) &&
                     Objects.equals(params.fields(), List.of("item0"))
             ) {
-                return "Tuple code for Tuple1";
+                return new TupleSchema(
+                        "com.aparigraha.tuples",
+                        "Tuple1",
+                        "Tuple code for Tuple1"
+                );
             }
             else return null;
         });
@@ -121,25 +138,41 @@ class TupleSpecProcessorTest {
                     "com.aparigraha.tuples".equals(params.packageName()) &&
                     Objects.equals(params.fields(), List.of("item0", "item1", "item2", "item3"))
             ) {
-                return "Tuple code for Tuple4";
+                return new TupleSchema(
+                        "com.aparigraha.tuples",
+                        "Tuple4",
+                        "Tuple code for Tuple4"
+                );
             }
             else if ("Tuple2".equals(params.className()) &&
                     "com.aparigraha.tuples".equals(params.packageName()) &&
                     Objects.equals(params.fields(), List.of("item0", "item1"))
             ) {
-                return "Tuple code for Tuple2";
+                return new TupleSchema(
+                        "com.aparigraha.tuples",
+                        "Tuple2",
+                        "Tuple code for Tuple2"
+                );
             }
             else if ("Tuple3".equals(params.className()) &&
                     "com.aparigraha.tuples".equals(params.packageName()) &&
                     Objects.equals(params.fields(), List.of("item0", "item1", "item2"))
             ) {
-                return "Tuple code for Tuple3";
+                return new TupleSchema(
+                        "com.aparigraha.tuples",
+                        "Tuple3",
+                        "Tuple code for Tuple3"
+                );
             }
             else if ("Tuple1".equals(params.className()) &&
                     "com.aparigraha.tuples".equals(params.packageName()) &&
                     Objects.equals(params.fields(), List.of("item0"))
             ) {
-                return "Tuple code for Tuple1";
+                return new TupleSchema(
+                        "com.aparigraha.tuples",
+                        "Tuple1",
+                        "Tuple code for Tuple1"
+                );
             }
             else return null;
         });
@@ -187,7 +220,11 @@ class TupleSpecProcessorTest {
                     "com.aparigraha.tuples".equals(params.packageName()) &&
                     Objects.equals(params.fields(), List.of("item0", "item1"))
             ) {
-                return "Tuple code for Tuple2";
+                return new TupleSchema(
+                        "com.aparigraha.tuples",
+                        "Tuple2",
+                        "Tuple code for Tuple2"
+                );
             }
             else return null;
         });
@@ -222,13 +259,21 @@ class TupleSpecProcessorTest {
                     "com.aparigraha.tuples".equals(params.packageName()) &&
                     Objects.equals(params.fields(), List.of("item0", "item1", "item2", "item3"))
             ) {
-                return "Tuple code for Tuple4";
+                return new TupleSchema(
+                        "com.aparigraha.tuples",
+                        "Tuple4",
+                        "Tuple code for Tuple4"
+                );
             }
             else if ("Tuple2".equals(params.className()) &&
                     "com.aparigraha.tuples".equals(params.packageName()) &&
                     Objects.equals(params.fields(), List.of("item0", "item1"))
             ) {
-                return "Tuple code for Tuple2";
+                return new TupleSchema(
+                        "com.aparigraha.tuples",
+                        "Tuple2",
+                        "Tuple code for Tuple2"
+                );
             }
             else return null;
         });

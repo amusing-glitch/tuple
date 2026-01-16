@@ -21,10 +21,14 @@ public class TupleGenerator {
     private static final PebbleTemplate template = getTemplate();
 
 
-    public String generate(TupleGenerationParams params) throws IOException {
+    public TupleSchema generate(TupleGenerationParams params) throws IOException {
         Writer writer = new StringWriter();
         template.evaluate(writer, templateParams(params.packageName(), params.className(), params.fields()));
-        return writer.toString();
+        return new TupleSchema(
+                params.packageName(),
+                params.className(),
+                writer.toString()
+        );
     }
 
     private static Map<String, Object> templateParams(String packageName, String className, List<String> fields) {

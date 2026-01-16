@@ -40,13 +40,16 @@ class TupleGeneratorTest {
         }
         """.trim();
 
-        assertEquals(expected, tupleGenerator.generate(
+        var tupleSchema = tupleGenerator.generate(
                 new TupleGenerationParams(
                         "com.aparigraha.tuples",
                         "StudentInfo",
                         List.of("id", "name", "age", "isDayScholar")
                 )
-        ));
+        );
+        assertEquals(expected, tupleSchema.javaCode());
+        assertEquals("StudentInfo", tupleSchema.className());
+        assertEquals("com.aparigraha.tuples", tupleSchema.packageName());
     }
 
 
@@ -79,13 +82,16 @@ class TupleGeneratorTest {
         }
         """.trim();
 
-        assertEquals(expected, tupleGenerator.generate(
+        var tupleSchema = tupleGenerator.generate(
                 new TupleGenerationParams(
                         "com.aparigraha.tuples",
                         "Tuple4",
                         "item",
                         4
                 )
-        ));
+        );
+        assertEquals(expected, tupleSchema.javaCode());
+        assertEquals("Tuple4", tupleSchema.className());
+        assertEquals("com.aparigraha.tuples", tupleSchema.packageName());
     }
 }

@@ -2,6 +2,7 @@ package com.aparigraha.tuple;
 
 import com.aparigraha.tuple.generator.TupleGenerationParams;
 import com.aparigraha.tuple.generator.TupleGenerator;
+import com.aparigraha.tuple.generator.TupleSchema;
 import com.aparigraha.tuple.generator.TupleSchemaWriter;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -44,34 +45,31 @@ public class TupleSpecProcessor extends AbstractProcessor {
                 .map(element -> element.getAnnotation(TupleSpec.class))
                 .flatMap(tupleSpec -> Arrays.stream(tupleSpec.value()).boxed())
                 .distinct()
-                .allMatch(size -> saveTupleSchema(generateTuple(size), size));
+                .map(size -> new TupleGenerationParams(packageName, className(size), fieldPrefix, size))
+                .allMatch(params -> saveTupleSchema(generateTuple(params)));
     }
 
-
-    private String generateTuple(int size) {
+    private TupleSchema generateTuple(TupleGenerationParams params) {
         try {
-            return tupleGenerator.generate(
-                    new TupleGenerationParams(
-                            packageName,
-                            className(size),
-                            fieldPrefix,
-                            size
-                    )
-            );
+            return tupleGenerator.generate(params);
         } catch (IOException exception) {
             processingEnv.getMessager().printMessage(
                     Diagnostic.Kind.ERROR,
-                    "Failed creating Tuple with size: " + size + "\n" + exception.getMessage()
+                    "Failed creating tuple: \"%s.%s\". Exception: %s".formatted(
+                            params.packageName(),
+                            params.className(),
+                            exception.getMessage()
+                    )
             );
         }
         return null;
     }
 
-    private boolean saveTupleSchema(String tupleSchema, int size) {
+    private boolean saveTupleSchema(TupleSchema tupleSchema) {
         if (tupleSchema == null) {
             return false;
         }
-        return tupleSchemaWriter.write(tupleSchema, completeClassName(size), processingEnv);
+        return tupleSchemaWriter.write(tupleSchema.javaCode(), tupleSchema.completeClassName(), processingEnv);
     }
 
     private static String className(int size) {
