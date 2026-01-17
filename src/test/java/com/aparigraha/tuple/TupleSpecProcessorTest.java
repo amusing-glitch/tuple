@@ -34,7 +34,9 @@ class TupleSpecProcessorTest {
     @Spy
     private RoundEnvironment roundEnvironment;
 
-    private TypeElement mockAnnotation = mockAnnotation();
+    private TypeElement mockTupleSpecAnnotation = mockAnnotation("com.aparigraha.tuple.TupleSpec");
+
+    private TypeElement mockNamedTupleSpecAnnotation = mockAnnotation("com.aparigraha.tuple.NamedTupleSpec");
 
 
     @Test
@@ -101,11 +103,11 @@ class TupleSpecProcessorTest {
 
         doReturn(Set.of(element1, element2))
                 .when(roundEnvironment)
-                .getElementsAnnotatedWith(mockAnnotation);
+                .getElementsAnnotatedWith(mockTupleSpecAnnotation);
 
         TupleSpecProcessor tupleSpecProcessor = new TupleSpecProcessor(tupleGenerator, tupleSchemaWriter);
 
-        assertTrue(tupleSpecProcessor.process(Set.of(mockAnnotation), roundEnvironment));
+        assertTrue(tupleSpecProcessor.process(Set.of(mockTupleSpecAnnotation), roundEnvironment));
         verify(tupleSchemaWriter).write(eq("Tuple code for Tuple4"), eq("com.aparigraha.tuples.Tuple4"), any());
         verify(tupleSchemaWriter).write(eq("Tuple code for Tuple2"), eq("com.aparigraha.tuples.Tuple2"), any());
         verify(tupleSchemaWriter).write(eq("Tuple code for Tuple3"), eq("com.aparigraha.tuples.Tuple3"), any());
@@ -114,20 +116,48 @@ class TupleSpecProcessorTest {
 
 
     @Test
-    void shouldGenerateTuplesForUniqueSizesWhenAnnotationsAreAreDefinedAcrossMultipleElements() throws IOException {
+    void shouldGenerateUniqueTuplesWhenAnnotationsAreAreDefinedAcrossMultipleElements() throws IOException {
         var tupleSpec1 = mock(TupleSpec.class);
         when(tupleSpec1.value())
-                .thenReturn(new int[] {2, 4, 1, 3});
+                .thenReturn(new int[] {1, 2, 1, 4});
 
         var tupleSpec2 = mock(TupleSpec.class);
         when(tupleSpec2.value())
-                .thenReturn(new int[] {1, 3, 2, 4});
+                .thenReturn(new int[] {3, 4, 3, 4});
+
+        var tupleSpec3 = mock(NamedTupleSpec.class);
+        var classSpec1 = mock(ClassSpec.class);
+        when(classSpec1.className()).thenReturn("StudentInfo");
+        when(classSpec1.fields()).thenReturn(new String[] { "Name" });
+        var classSpec2 = mock(ClassSpec.class);
+        when(classSpec2.className()).thenReturn("Tuple2");
+        when(classSpec2.fields()).thenReturn(new String[] { "item0", "item1" });
+        var classSpec3 = mock(ClassSpec.class);
+        when(classSpec3.className()).thenReturn("StudentInfo");
+        when(classSpec3.fields()).thenReturn(new String[] { "Name" });
+        when(tupleSpec3.value()).thenReturn(new ClassSpec[] { classSpec1, classSpec2, classSpec3 });
+
+
+        var tupleSpec4 = mock(NamedTupleSpec.class);
+        var classSpec4 = mock(ClassSpec.class);
+        when(classSpec4.className()).thenReturn("DepartmentInfo");
+        when(classSpec4.fields()).thenReturn(new String[] { "Name" });
+        var classSpec5 = mock(ClassSpec.class);
+        when(classSpec5.className()).thenReturn("Tuple2");
+        when(classSpec5.fields()).thenReturn(new String[] { "item0", "item1" });
+        var classSpec6 = mock(ClassSpec.class);
+        when(classSpec6.className()).thenReturn("DepartmentInfo");
+        when(classSpec6.fields()).thenReturn(new String[] { "Name" });
+        when(tupleSpec4.value()).thenReturn(new ClassSpec[] { classSpec4, classSpec5, classSpec6 });
+
 
         var element1 = mock(VariableElement.class);
         when(element1.getAnnotation(TupleSpec.class)).thenReturn(tupleSpec1);
+        when(element1.getAnnotation(NamedTupleSpec.class)).thenReturn(tupleSpec3);
 
         var element2 = mock(VariableElement.class);
         when(element2.getAnnotation(TupleSpec.class)).thenReturn(tupleSpec2);
+        when(element2.getAnnotation(NamedTupleSpec.class)).thenReturn(tupleSpec4);
 
         when(tupleGenerator.generate(any())).thenAnswer(invocation -> {
             TupleGenerationParams params = invocation.getArgument(0);
@@ -172,20 +202,45 @@ class TupleSpecProcessorTest {
                         "Tuple code for Tuple1"
                 );
             }
+            else if ("StudentInfo".equals(params.className()) &&
+                    "com.aparigraha.tuples".equals(params.packageName()) &&
+                    Objects.equals(params.fields(), List.of("Name"))
+            ) {
+                return new TupleSchema(
+                        "com.aparigraha.tuples",
+                        "StudentInfo",
+                        "Tuple code for StudentInfo"
+                );
+            }
+            else if ("DepartmentInfo".equals(params.className()) &&
+                    "com.aparigraha.tuples".equals(params.packageName()) &&
+                    Objects.equals(params.fields(), List.of("Name"))
+            ) {
+                return new TupleSchema(
+                        "com.aparigraha.tuples",
+                        "DepartmentInfo",
+                        "Tuple code for DepartmentInfo"
+                );
+            }
             else return null;
         });
 
         doReturn(Set.of(element1, element2))
                 .when(roundEnvironment)
-                .getElementsAnnotatedWith(mockAnnotation);
+                .getElementsAnnotatedWith(mockTupleSpecAnnotation);
+        doReturn(Set.of())
+                .when(roundEnvironment)
+                .getElementsAnnotatedWith(mockNamedTupleSpecAnnotation);
 
         TupleSpecProcessor tupleSpecProcessor = new TupleSpecProcessor(tupleGenerator, tupleSchemaWriter);
 
-        assertTrue(tupleSpecProcessor.process(Set.of(mockAnnotation), roundEnvironment));
+        assertTrue(tupleSpecProcessor.process(Set.of(mockTupleSpecAnnotation, mockNamedTupleSpecAnnotation), roundEnvironment));
         verify(tupleSchemaWriter).write(eq("Tuple code for Tuple4"), eq("com.aparigraha.tuples.Tuple4"), any());
         verify(tupleSchemaWriter).write(eq("Tuple code for Tuple2"), eq("com.aparigraha.tuples.Tuple2"), any());
         verify(tupleSchemaWriter).write(eq("Tuple code for Tuple3"), eq("com.aparigraha.tuples.Tuple3"), any());
         verify(tupleSchemaWriter).write(eq("Tuple code for Tuple1"), eq("com.aparigraha.tuples.Tuple1"), any());
+        verify(tupleSchemaWriter).write(eq("Tuple code for StudentInfo"), eq("com.aparigraha.tuples.StudentInfo"), any());
+        verify(tupleSchemaWriter).write(eq("Tuple code for DepartmentInfo"), eq("com.aparigraha.tuples.DepartmentInfo"), any());
     }
 
 
@@ -223,11 +278,11 @@ class TupleSpecProcessorTest {
 
         doReturn(Set.of(element1))
                 .when(roundEnvironment)
-                .getElementsAnnotatedWith(mockAnnotation);
+                .getElementsAnnotatedWith(mockTupleSpecAnnotation);
 
         TupleSpecProcessor tupleSpecProcessor = new TupleSpecProcessor(tupleGenerator, tupleSchemaWriter);
 
-        assertTrue(tupleSpecProcessor.process(Set.of(mockAnnotation), roundEnvironment));
+        assertTrue(tupleSpecProcessor.process(Set.of(mockTupleSpecAnnotation), roundEnvironment));
         verify(tupleSchemaWriter).write(eq("Tuple code for Tuple2"), eq("com.aparigraha.tuples.Tuple2"), any());
         verify(tupleSchemaWriter, times(0)).write(eq("Tuple code for Tuple4"), eq("com.aparigraha.tuples.Tuple4"), any());
     }
@@ -275,11 +330,11 @@ class TupleSpecProcessorTest {
 
         doReturn(Set.of(element1))
                 .when(roundEnvironment)
-                .getElementsAnnotatedWith(mockAnnotation);
+                .getElementsAnnotatedWith(mockTupleSpecAnnotation);
 
         TupleSpecProcessor tupleSpecProcessor = new TupleSpecProcessor(tupleGenerator, tupleSchemaWriter);
 
-        assertTrue(tupleSpecProcessor.process(Set.of(mockAnnotation), roundEnvironment));
+        assertTrue(tupleSpecProcessor.process(Set.of(mockTupleSpecAnnotation), roundEnvironment));
         verify(tupleSchemaWriter).write(eq("Tuple code for Tuple2"), eq("com.aparigraha.tuples.Tuple2"), any());
         verify(tupleSchemaWriter).write(eq("Tuple code for Tuple4"), eq("com.aparigraha.tuples.Tuple4"), any());
     }
@@ -295,10 +350,155 @@ class TupleSpecProcessorTest {
     }
 
 
-    private TypeElement mockAnnotation() {
+    @Test
+    void shouldGenerateNamedTuplesWhenAnnotationsAreAreDefinedAcrossMultipleElements() throws IOException {
+        var tupleSpec1 = mock(NamedTupleSpec.class);
+        var classSpec1 = mock(ClassSpec.class);
+        when(classSpec1.className())
+                .thenReturn("StudentInfo");
+        when(classSpec1.fields())
+                .thenReturn(new String[] { "Name", "Age", "isDayScholar" });
+        when(tupleSpec1.value()).thenReturn(new ClassSpec[] { classSpec1 });
+
+        var tupleSpec2 = mock(NamedTupleSpec.class);
+        var classSpec2 = mock(ClassSpec.class);
+        when(classSpec2.className())
+                .thenReturn("DepartmentInfo");
+        when(classSpec2.fields())
+                .thenReturn(new String[] { "Name" });
+        var classSpec3 = mock(ClassSpec.class);
+        when(classSpec3.className())
+                .thenReturn("StaffInfo");
+        when(classSpec3.fields())
+                .thenReturn(new String[] { "Name", "Age" });
+
+        when(tupleSpec2.value()).thenReturn(new ClassSpec[] { classSpec2, classSpec3 });
+
+        var element1 = mock(VariableElement.class);
+        when(element1.getAnnotation(NamedTupleSpec.class)).thenReturn(tupleSpec1);
+        when(element1.getAnnotation(TupleSpec.class)).thenReturn(null);
+
+        var element2 = mock(VariableElement.class);
+        when(element2.getAnnotation(NamedTupleSpec.class)).thenReturn(tupleSpec2);
+        when(element2.getAnnotation(TupleSpec.class)).thenReturn(null);
+
+        when(tupleGenerator.generate(any())).thenAnswer(invocation -> {
+            TupleGenerationParams params = invocation.getArgument(0);
+
+            if ("StudentInfo".equals(params.className()) &&
+                    "com.aparigraha.tuples".equals(params.packageName()) &&
+                    Objects.equals(params.fields(), List.of("Name", "Age", "isDayScholar"))
+            ) {
+                return new TupleSchema(
+                        "com.aparigraha.tuples",
+                        "StudentInfo",
+                        "Tuple code for StudentInfo"
+                );
+            }
+            else if ("DepartmentInfo".equals(params.className()) &&
+                    "com.aparigraha.tuples".equals(params.packageName()) &&
+                    Objects.equals(params.fields(), List.of("Name"))
+            ) {
+                return new TupleSchema(
+                        "com.aparigraha.tuples",
+                        "DepartmentInfo",
+                        "Tuple code for DepartmentInfo"
+                );
+            }
+            else if ("StaffInfo".equals(params.className()) &&
+                    "com.aparigraha.tuples".equals(params.packageName()) &&
+                    Objects.equals(params.fields(), List.of("Name", "Age"))
+            ) {
+                return new TupleSchema(
+                        "com.aparigraha.tuples",
+                        "StaffInfo",
+                        "Tuple code for StaffInfo"
+                );
+            }
+            else return null;
+        });
+
+        doReturn(Set.of(element1, element2))
+                .when(roundEnvironment)
+                .getElementsAnnotatedWith(mockNamedTupleSpecAnnotation);
+
+        doReturn(Set.of())
+                .when(roundEnvironment)
+                .getElementsAnnotatedWith(mockTupleSpecAnnotation);
+
+        TupleSpecProcessor tupleSpecProcessor = new TupleSpecProcessor(tupleGenerator, tupleSchemaWriter);
+
+        assertTrue(tupleSpecProcessor.process(Set.of(mockTupleSpecAnnotation, mockNamedTupleSpecAnnotation), roundEnvironment));
+        verify(tupleSchemaWriter).write(eq("Tuple code for StudentInfo"), eq("com.aparigraha.tuples.StudentInfo"), any());
+        verify(tupleSchemaWriter).write(eq("Tuple code for DepartmentInfo"), eq("com.aparigraha.tuples.DepartmentInfo"), any());
+        verify(tupleSchemaWriter).write(eq("Tuple code for StaffInfo"), eq("com.aparigraha.tuples.StaffInfo"), any());
+    }
+
+
+    @Test
+    void shouldGenerateNamedTuplesWhenAnnotationsAreAreDefinedOnTheSameElement() throws IOException {
+        var tupleSpec = mock(TupleSpec.class);
+        when(tupleSpec.value())
+                .thenReturn(new int[] { 1 });
+
+        var namedTupleSpec = mock(NamedTupleSpec.class);
+        var classSpec = mock(ClassSpec.class);
+        when(classSpec.className())
+                .thenReturn("DepartmentInfo");
+        when(classSpec.fields())
+                .thenReturn(new String[] { "Name" });
+        when(namedTupleSpec.value()).thenReturn(new ClassSpec[] { classSpec });
+
+        var element = mock(VariableElement.class);
+        when(element.getAnnotation(NamedTupleSpec.class)).thenReturn(namedTupleSpec);
+        when(element.getAnnotation(TupleSpec.class)).thenReturn(tupleSpec);
+
+        when(tupleGenerator.generate(any())).thenAnswer(invocation -> {
+            TupleGenerationParams params = invocation.getArgument(0);
+
+            if ("Tuple1".equals(params.className()) &&
+                    "com.aparigraha.tuples".equals(params.packageName()) &&
+                    Objects.equals(params.fields(), List.of("item0"))
+            ) {
+                return new TupleSchema(
+                        "com.aparigraha.tuples",
+                        "Tuple1",
+                        "Tuple code for Tuple1"
+                );
+            }
+            else if ("DepartmentInfo".equals(params.className()) &&
+                    "com.aparigraha.tuples".equals(params.packageName()) &&
+                    Objects.equals(params.fields(), List.of("Name"))
+            ) {
+                return new TupleSchema(
+                        "com.aparigraha.tuples",
+                        "DepartmentInfo",
+                        "Tuple code for DepartmentInfo"
+                );
+            }
+            else return null;
+        });
+
+        doReturn(Set.of(element))
+                .when(roundEnvironment)
+                .getElementsAnnotatedWith(mockNamedTupleSpecAnnotation);
+
+        doReturn(Set.of(element))
+                .when(roundEnvironment)
+                .getElementsAnnotatedWith(mockTupleSpecAnnotation);
+
+        TupleSpecProcessor tupleSpecProcessor = new TupleSpecProcessor(tupleGenerator, tupleSchemaWriter);
+
+        assertTrue(tupleSpecProcessor.process(Set.of(mockTupleSpecAnnotation, mockNamedTupleSpecAnnotation), roundEnvironment));
+        verify(tupleSchemaWriter, times(1)).write(eq("Tuple code for Tuple1"), eq("com.aparigraha.tuples.Tuple1"), any());
+        verify(tupleSchemaWriter, times(1)).write(eq("Tuple code for DepartmentInfo"), eq("com.aparigraha.tuples.DepartmentInfo"), any());
+    }
+
+
+    private TypeElement mockAnnotation(String className) {
         var annotation = mock(TypeElement.class);
         var name = mock(Name.class);
-        when(name.toString()).thenReturn("com.aparigraha.tuple.TupleSpec");
+        when(name.toString()).thenReturn(className);
         when(annotation.getQualifiedName()).thenReturn(name);
         return annotation;
     }
