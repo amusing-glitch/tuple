@@ -1,149 +1,72 @@
 package com.aparigraha.tuple;
 
-import com.aparigraha.tuple.generator.TupleGenerationParams;
-import com.aparigraha.tuple.generator.TupleGenerator;
-import com.aparigraha.tuple.generator.TupleSchema;
-import com.aparigraha.tuple.generator.TupleSchemaWriter;
+import com.sun.source.tree.ExpressionTree;
+import com.sun.source.tree.LambdaExpressionTree;
+import com.sun.source.tree.MethodInvocationTree;
+import com.sun.source.util.TreePath;
+import com.sun.source.util.TreePathScanner;
+import com.sun.source.util.TreeScanner;
+import com.sun.source.util.Trees;
 
-import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.RoundEnvironment;
-import javax.annotation.processing.SupportedAnnotationTypes;
-import javax.annotation.processing.SupportedSourceVersion;
+import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
-import java.io.IOException;
-import java.lang.annotation.Annotation;
 import java.util.*;
-import java.util.stream.Stream;
 
 
-@SupportedAnnotationTypes({"com.aparigraha.tuple.TupleSpec", "com.aparigraha.tuple.NamedTupleSpec"})
+@SupportedAnnotationTypes("com.aparigraha.tuple.TupleSpec")
 @SupportedSourceVersion(SourceVersion.RELEASE_21)
 public class TupleSpecProcessor extends AbstractProcessor {
-    private static final String packageName = "com.aparigraha.tuples";
-    private static final String tuple = "Tuple";
-    private static final String fieldPrefix = "item";
-    private static final Set<Class<? extends Annotation>> targetAnnotations = Set.of(
-            TupleSpec.class,
-            NamedTupleSpec.class
-    );
+    private Trees trees;
 
-    private final TupleGenerator tupleGenerator;
-    private final TupleSchemaWriter tupleSchemaWriter;
+    public TupleSpecProcessor() {}
 
-    public TupleSpecProcessor(TupleGenerator tupleGenerator, TupleSchemaWriter tupleSchemaWriter) {
-        super();
-        this.tupleGenerator = tupleGenerator;
-        this.tupleSchemaWriter = tupleSchemaWriter;
-    }
 
-    public TupleSpecProcessor() {
-        this(new TupleGenerator(), new TupleSchemaWriter());
-    }
-
-    private Stream<TupleSpec> tupleSpecs(
-            Set<? extends TypeElement> annotations,
-            List<? extends Element> elements
-    ) {
-        if (annotations.stream().map(a -> a.getQualifiedName().toString()).anyMatch(TupleSpec.class.getCanonicalName()::equals)) {
-            return elements.stream()
-                    .map(element -> element.getAnnotation(TupleSpec.class));
-        } else {
-            return Stream.of();
-        }
-    }
-
-    private Stream<NamedTupleSpec> namedTupleSpecs(
-            Set<? extends TypeElement> annotations,
-            List<? extends Element> elements
-    ) {
-        if (annotations.stream().map(a -> a.getQualifiedName().toString()).anyMatch(NamedTupleSpec.class.getCanonicalName()::contentEquals)) {
-            return elements.stream()
-                    .map(element -> element.getAnnotation(NamedTupleSpec.class));
-        } else {
-            return Stream.of();
-        }
+    @Override
+    public synchronized void init(ProcessingEnvironment processingEnv) {
+        super.init(processingEnv);
+        this.trees = Trees.instance(processingEnv);
     }
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        var elements = annotations.stream()
-                .map(roundEnv::getElementsAnnotatedWith)
-                .flatMap(Set::stream)
-                .distinct()
-                .toList();
+        var methodCallScanner = new TreePathScanner<Void, Void>() {
+            @Override
+            public Void visitMethodInvocation(MethodInvocationTree node, Void p) {
+                if (isTargetMethod(node)) {
+                    for (ExpressionTree argument: node.getArguments().stream().skip(1).toList()) {
+                        if (argument instanceof LambdaExpressionTree lambdaArgument) {
+                            var fieldName = lambdaArgument
+                                    .getParameters()
+                                    .getFirst()
+                                    .getName()
+                                    .toString();
+                            System.out.println("Field: " + fieldName);
 
-        var tupleSpecParam = tupleSpecs(annotations, elements)
-                .filter(Objects::nonNull)
-                .flatMap(tupleSpec -> Arrays.stream(tupleSpec.value()).boxed())
-                .map(size -> new TupleGenerationParams(
-                        packageName,
-                        tuple + size,
-                        fieldPrefix,
-                        size
-                ));
+                            var lambdaPath = getCurrentPath();
+                            trees.getElement(lambdaPath);
+                            TreePath bodyPath = new TreePath(lambdaPath, lambdaArgument.getBody());
+                            TypeMirror bodyType = trees.getTypeMirror(bodyPath);
+                            System.out.println("Type: " + bodyType);
+                        }
+                    }
+                }
+                return super.visitMethodInvocation(node, p);
+            }
 
-        var namedTupleSpecParam = namedTupleSpecs(annotations, elements)
-                .filter(Objects::nonNull)
-                .flatMap(namedTupleSpec -> Arrays.stream(namedTupleSpec.value()))
-                .map(classSpec -> new TupleGenerationParams(
-                        packageName,
-                        classSpec.className(),
-                        Arrays.stream(classSpec.fields()).toList()
-                ));
+            private boolean isTargetMethod(MethodInvocationTree node) {
+                return node.getMethodSelect().toString().equals("DynamicTuple.of");
+            }
+        };
 
-        Stream.concat(tupleSpecParam, namedTupleSpecParam)
-                .distinct()
-                .map(this::generateTuple)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .forEach(this::saveTupleSchema);
-
-        return canClaim(annotations);
-    }
-
-
-    private boolean canClaim(Set<? extends TypeElement> annotations) {
-        var supportedAnnotations = getSupportedAnnotationTypes();
-        return annotations.stream()
-                .map(a -> a.getQualifiedName().toString())
-                .anyMatch(supportedAnnotations::contains);
-    }
-
-
-    private Optional<TupleSchema> generateTuple(TupleGenerationParams params) {
-        try {
-            return Optional.of(tupleGenerator.generate(params));
-        } catch (IOException exception) {
-            if (processingEnv != null)
-                processingEnv.getMessager().printMessage(
-                        Diagnostic.Kind.ERROR,
-                        "Failed creating tuple: \"%s.%s\". Exception: %s".formatted(
-                                params.packageName(),
-                                params.className(),
-                                exception.getMessage()
-                        )
-                );
-            return Optional.empty();
+        for (Element element : roundEnv.getRootElements()) {
+            if (element.getKind().isClass() || element.getKind().isInterface()) {
+                methodCallScanner.scan(trees.getPath(element), null);
+            }
         }
-    }
-
-
-    private void saveTupleSchema(TupleSchema tupleSchema) {
-        try {
-            tupleSchemaWriter.write(tupleSchema.javaCode(), tupleSchema.completeClassName(), processingEnv);
-        } catch (IOException exception) {
-            if (processingEnv != null)
-                processingEnv.getMessager().printMessage(
-                        Diagnostic.Kind.ERROR,
-                        "Failed creating tuple: \"%s.%s\". Exception: %s".formatted(
-                                tupleSchema.packageName(),
-                                tupleSchema.className(),
-                                exception.getMessage()
-                        )
-                );
-        }
+        return false;
     }
 }
