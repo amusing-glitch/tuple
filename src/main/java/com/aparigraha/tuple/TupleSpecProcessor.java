@@ -45,15 +45,17 @@ public class TupleSpecProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+        var fields = new ArrayList<List<String>>();
         var methodCallScanner = new TreePathScanner<Void, Void>() {
             @Override
             public Void visitMethodInvocation(MethodInvocationTree node, Void p) {
                 var currentPath = getCurrentPath();
                 trees.getElement(currentPath); // Vital for resolving the types of arguments
                 if (isTargetMethod(node)) {
-                    for (ExpressionTree argument: node.getArguments()) {
-                        System.out.println("Type: " + argumentType(currentPath, argument));
-                    }
+                    fields.add(node.getArguments().stream()
+                            .map(argument -> argumentType(currentPath, argument))
+                            .toList()
+                    );
                 }
                 return super.visitMethodInvocation(node, p);
             }
@@ -74,6 +76,8 @@ public class TupleSpecProcessor extends AbstractProcessor {
                 methodCallScanner.scan(trees.getPath(element), null);
             }
         }
+
+        System.out.println(fields);
 
         if (!hasGenerated) {
             generateDynamicTupleFactoryClass();
