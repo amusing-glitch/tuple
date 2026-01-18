@@ -52,12 +52,16 @@ public class TupleSpecProcessor extends AbstractProcessor {
                 trees.getElement(currentPath); // Vital for resolving the types of arguments
                 if (isTargetMethod(node)) {
                     for (ExpressionTree argument: node.getArguments()) {
-                        TreePath argumentPath = new TreePath(currentPath, argument);
-                        TypeMirror argumentType = trees.getTypeMirror(argumentPath);
-                        System.out.println("Type: " + argumentType);
+                        System.out.println("Type: " + argumentType(currentPath, argument));
                     }
                 }
                 return super.visitMethodInvocation(node, p);
+            }
+
+            private String argumentType(TreePath currentPath, ExpressionTree argument) {
+                TreePath argumentPath = new TreePath(currentPath, argument);
+                TypeMirror argumentType = trees.getTypeMirror(argumentPath);
+                return argumentType.toString();
             }
 
             private boolean isTargetMethod(MethodInvocationTree node) {
