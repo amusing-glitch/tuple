@@ -48,10 +48,10 @@ public class TupleSpecProcessor extends AbstractProcessor {
         var methodCallScanner = new TreePathScanner<Void, Void>() {
             @Override
             public Void visitMethodInvocation(MethodInvocationTree node, Void p) {
+                var currentPath = getCurrentPath();
+                trees.getElement(currentPath); // Vital for resolving the types of arguments
                 if (isTargetMethod(node)) {
                     for (ExpressionTree argument: node.getArguments()) {
-                        var currentPath = getCurrentPath();
-                        trees.getElement(currentPath); // Vital for resolving the types of arguments
                         TreePath argumentPath = new TreePath(currentPath, argument);
                         TypeMirror argumentType = trees.getTypeMirror(argumentPath);
                         System.out.println("Type: " + argumentType);
