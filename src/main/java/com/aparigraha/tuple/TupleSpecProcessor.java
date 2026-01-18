@@ -45,41 +45,30 @@ public class TupleSpecProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        var fields = new ArrayList<List<String>>();
-        var methodCallScanner = new TreePathScanner<Void, Void>() {
-            @Override
-            public Void visitMethodInvocation(MethodInvocationTree node, Void p) {
-                var currentPath = getCurrentPath();
-                trees.getElement(currentPath); // Vital for resolving the types of arguments
-                if (isTargetMethod(node)) {
-                    fields.add(node.getArguments().stream()
-                            .map(argument -> argumentType(currentPath, argument))
-                            .toList()
-                    );
-                }
-                return super.visitMethodInvocation(node, p);
-            }
-
-            private String argumentType(TreePath currentPath, ExpressionTree argument) {
-                TreePath argumentPath = new TreePath(currentPath, argument);
-                TypeMirror argumentType = trees.getTypeMirror(argumentPath);
-                return argumentType.toString();
-            }
-
-            private boolean isTargetMethod(MethodInvocationTree node) {
-                return node.getMethodSelect().toString().equals("DynamicTuple.of");
-            }
-        };
-
-        for (Element element : roundEnv.getRootElements()) {
-            if (element.getKind().isClass() || element.getKind().isInterface()) {
-                methodCallScanner.scan(trees.getPath(element), null);
-            }
-        }
-
-        System.out.println(fields);
-
         if (!hasGenerated) {
+            var fields = new HashSet<Integer>();
+            var methodCallScanner = new TreePathScanner<Void, Void>() {
+                @Override
+                public Void visitMethodInvocation(MethodInvocationTree node, Void p) {
+                    if (isTargetMethod(node)) {
+                        fields.add(node.getArguments().size());
+                    }
+                    return super.visitMethodInvocation(node, p);
+                }
+
+                private boolean isTargetMethod(MethodInvocationTree node) {
+                    return node.getMethodSelect().toString().equals("DynamicTuple.of");
+                }
+            };
+
+            for (Element element : roundEnv.getRootElements()) {
+                if (element.getKind().isClass() || element.getKind().isInterface()) {
+                    methodCallScanner.scan(trees.getPath(element), null);
+                }
+            }
+
+            System.out.println(fields);
+
             generateDynamicTupleFactoryClass();
             hasGenerated = true;
         }
