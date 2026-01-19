@@ -8,19 +8,16 @@ import com.aparigraha.tuple.dynamic.entities.TupleGenerationParams;
 import com.aparigraha.tuple.dynamic.entities.TupleGenerator;
 import com.aparigraha.tuple.dynamic.GeneratedClassSchema;
 import com.aparigraha.tuple.dynamic.templates.PebbleTemplateProcessor;
-import com.sun.source.tree.MethodInvocationTree;
-import com.sun.source.util.TreePathScanner;
-import com.sun.source.util.Trees;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
-import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.aparigraha.tuple.dynamic.templates.JavaTemplate.*;
 
@@ -31,10 +28,16 @@ public class TupleSpecProcessor extends OncePerLifecycleProcessor {
 
     private final DynamicTupleGenerator dynamicTupleGenerator;
     private final TupleGenerator tupleGenerator;
+    private final MethodScanner methodScanner;
 
-    public TupleSpecProcessor(TupleGenerator tupleGenerator, DynamicTupleGenerator dynamicTupleGenerator) {
+    public TupleSpecProcessor(
+            TupleGenerator tupleGenerator,
+            DynamicTupleGenerator dynamicTupleGenerator,
+            MethodScanner methodScanner
+    ) {
         this.tupleGenerator = tupleGenerator;
         this.dynamicTupleGenerator = dynamicTupleGenerator;
+        this.methodScanner = methodScanner;
     }
 
     public TupleSpecProcessor(PebbleTemplateProcessor pebbleTemplateProcessor) {
@@ -44,7 +47,8 @@ public class TupleSpecProcessor extends OncePerLifecycleProcessor {
                         pebbleTemplateProcessor,
                         new StaticTupleFactoryGenerator(pebbleTemplateProcessor),
                         new ZipperMethodGenerator(pebbleTemplateProcessor)
-                )
+                ),
+                new MethodScanner()
         );
     }
 
@@ -56,29 +60,32 @@ public class TupleSpecProcessor extends OncePerLifecycleProcessor {
 
     @Override
     public boolean processFirstRound(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        var fields = new HashSet<Integer>();
-        var trees = Trees.instance(processingEnv);
+        var tupleDefinitions = extractTupleDefinitions(roundEnv);
 
-        var methodCallScanner = new TreePathScanner<Void, Void>() {
-            @Override
-            public Void visitMethodInvocation(MethodInvocationTree node, Void p) {
-                if (isTargetMethod(node)) {
-                    fields.add(node.getArguments().size());
-                }
-                return super.visitMethodInvocation(node, p);
-            }
+        createTupleClasses(tupleDefinitions);
 
-            private boolean isTargetMethod(MethodInvocationTree node) {
-                return targetMethods
-                        .contains(node.getMethodSelect().toString());
-            }
-        };
+        createFactoryClass(tupleDefinitions);
 
-        roundEnv.getRootElements().stream()
-                .filter(element -> element.getKind().isClass() || element.getKind().isInterface())
-                .forEach(element -> methodCallScanner.scan(trees.getPath(element), null));
+        return false;
+    }
 
-        fields.stream()
+    private Set<Integer> extractTupleDefinitions(RoundEnvironment roundEnv) {
+        return roundEnv.getRootElements().stream()
+                .filter(element -> element.getKind().isClass())
+                .map(element ->
+                        methodScanner.scan(
+                                node -> targetMethods.contains(node.getMethodSelect().toString()),
+                                processingEnv,
+                                element
+                        )
+                )
+                .flatMap(Collection::stream)
+                .map(node -> node.getArguments().size())
+                .collect(Collectors.toSet());
+    }
+
+    private void createTupleClasses(Set<Integer> tupleDefinitions) {
+        tupleDefinitions.stream()
                 .map(size -> new TupleGenerationParams(
                         packageName,
                         classPrefix + size,
@@ -88,16 +95,16 @@ public class TupleSpecProcessor extends OncePerLifecycleProcessor {
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .forEach(this::save);
+    }
 
+    private void createFactoryClass(Set<Integer> tupleDefinitions) {
         generateDynamicTupleClass(new DynamicTupleGenerationParam(
                 packageName,
                 dynamicTupleClassName,
                 dynamicTupleFactoryMethodName,
-                fields
+                tupleDefinitions
         )).ifPresent(this::save);
-        return false;
     }
-
 
     private Optional<GeneratedClassSchema> generateTupleClass(TupleGenerationParams params) {
         try {
