@@ -1,11 +1,9 @@
 package com.aparigraha.tuple.dynamic;
 
-import com.aparigraha.tuple.templates.PebbleTemplateProcessor;
+import com.aparigraha.tuple.dynamic.templates.PebbleTemplateProcessor;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class ZipperMethodGeneratorTest {
     @Test

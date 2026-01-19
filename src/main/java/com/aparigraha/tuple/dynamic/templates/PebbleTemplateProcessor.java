@@ -1,4 +1,4 @@
-package com.aparigraha.tuple.templates;
+package com.aparigraha.tuple.dynamic.templates;
 
 import io.pebbletemplates.pebble.PebbleEngine;
 import io.pebbletemplates.pebble.loader.ClasspathLoader;

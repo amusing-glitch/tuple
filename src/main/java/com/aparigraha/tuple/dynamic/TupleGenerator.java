@@ -1,12 +1,12 @@
-package com.aparigraha.tuple.generator;
+package com.aparigraha.tuple.dynamic;
 
-import com.aparigraha.tuple.templates.PebbleTemplateProcessor;
+import com.aparigraha.tuple.dynamic.templates.PebbleTemplateProcessor;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import static com.aparigraha.tuple.templates.JavaTemplate.*;
+import static com.aparigraha.tuple.dynamic.templates.JavaTemplate.*;
 
 
 public class TupleGenerator {
@@ -16,8 +16,8 @@ public class TupleGenerator {
         this.pebbleTemplateProcessor = pebbleTemplateProcessor;
     }
 
-    public TupleSchema generate(TupleGenerationParams params) throws IOException {
-        return new TupleSchema(
+    public GeneratedClassSchema generate(TupleGenerationParams params) throws IOException {
+        return new GeneratedClassSchema(
                 params.packageName(),
                 params.className(),
                 pebbleTemplateProcessor.process("Tuple.peb", templateParams(params.packageName(), params.className(), params.fields()))

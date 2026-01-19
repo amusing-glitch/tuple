@@ -1,4 +1,4 @@
-package com.aparigraha.tuple.templates;
+package com.aparigraha.tuple.dynamic.templates;
 
 import java.util.List;
 import java.util.stream.IntStream;

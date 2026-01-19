@@ -1,6 +1,6 @@
-package com.aparigraha.tuple.generator;
+package com.aparigraha.tuple.dynamic;
 
-public record TupleSchema(
+public record GeneratedClassSchema(
         String packageName,
         String className,
         String javaCode

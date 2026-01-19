@@ -1,14 +1,14 @@
-package com.aparigraha.tuple.generator;
+package com.aparigraha.tuple.dynamic;
 
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 
-class TupleSchemaTest {
+class GeneratedClassSchemaTest {
     @Test
     void shouldReturnCompleteClassName() {
-        var tupleSchema = new TupleSchema("package", "className", "Tuple code");
+        var tupleSchema = new GeneratedClassSchema("package", "className", "Tuple code");
         assertEquals("package.className", tupleSchema.completeClassName());
     }
 }

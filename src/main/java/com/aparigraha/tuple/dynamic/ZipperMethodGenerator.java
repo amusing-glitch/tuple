@@ -1,11 +1,11 @@
 package com.aparigraha.tuple.dynamic;
 
-import com.aparigraha.tuple.templates.PebbleTemplateProcessor;
+import com.aparigraha.tuple.dynamic.templates.PebbleTemplateProcessor;
 
 import java.io.IOException;
 import java.util.Map;
 
-import static com.aparigraha.tuple.templates.JavaTemplate.*;
+import static com.aparigraha.tuple.dynamic.templates.JavaTemplate.*;
 
 
 public class ZipperMethodGenerator {

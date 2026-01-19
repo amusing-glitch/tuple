@@ -3,10 +3,10 @@ package com.aparigraha.tuple;
 import com.aparigraha.tuple.dynamic.DynamicTupleGenerator;
 import com.aparigraha.tuple.dynamic.StaticTupleFactoryGenerator;
 import com.aparigraha.tuple.dynamic.ZipperMethodGenerator;
-import com.aparigraha.tuple.generator.TupleGenerationParams;
-import com.aparigraha.tuple.generator.TupleGenerator;
-import com.aparigraha.tuple.generator.TupleSchema;
-import com.aparigraha.tuple.templates.PebbleTemplateProcessor;
+import com.aparigraha.tuple.dynamic.TupleGenerationParams;
+import com.aparigraha.tuple.dynamic.TupleGenerator;
+import com.aparigraha.tuple.dynamic.GeneratedClassSchema;
+import com.aparigraha.tuple.dynamic.templates.PebbleTemplateProcessor;
 import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.util.TreePathScanner;
 import com.sun.source.util.Trees;
@@ -97,7 +97,7 @@ public class TupleSpecProcessor extends AbstractProcessor {
                     )).map(this::generateTuple)
                     .filter(Optional::isPresent)
                     .map(Optional::get)
-                    .forEach(tupleSchema -> save(tupleSchema.javaCode(), tupleSchema.completeClassName()));
+                    .forEach(generatedClassSchema -> save(generatedClassSchema.javaCode(), generatedClassSchema.completeClassName()));
 
             generateDynamicTupleFactoryClass(fields);
             hasGenerated = true;
@@ -105,7 +105,7 @@ public class TupleSpecProcessor extends AbstractProcessor {
         return false;
     }
 
-    private Optional<TupleSchema> generateTuple(TupleGenerationParams params) {
+    private Optional<GeneratedClassSchema> generateTuple(TupleGenerationParams params) {
         try {
             return Optional.of(tupleGenerator.generate(params));
         } catch (IOException e) {
