@@ -2,6 +2,7 @@ package com.aparigraha.tuple;
 
 import com.aparigraha.tuple.dynamic.DynamicTupleGenerator;
 import com.aparigraha.tuple.dynamic.StaticTupleFactoryGenerator;
+import com.aparigraha.tuple.dynamic.ZipperMethodGenerator;
 import com.aparigraha.tuple.generator.TupleGenerationParams;
 import com.aparigraha.tuple.generator.TupleGenerator;
 import com.aparigraha.tuple.generator.TupleSchema;
@@ -27,6 +28,7 @@ public class TupleSpecProcessor extends AbstractProcessor {
     private static final String packageName = "com.aparigraha.tuple.dynamic";
     private static final String classPrefix = "Tuple";
     private static final String fieldPrefix = "item";
+    private static final Set<String> targetMethods = Set.of("DynamicTuple.of", "DynamicTuple.zip");
 
     private final DynamicTupleGenerator dynamicTupleGenerator;
     private final TupleGenerator tupleGenerator;
@@ -44,7 +46,8 @@ public class TupleSpecProcessor extends AbstractProcessor {
                 new TupleGenerator(pebbleTemplateProcessor),
                 new DynamicTupleGenerator(
                         pebbleTemplateProcessor,
-                        new StaticTupleFactoryGenerator(pebbleTemplateProcessor)
+                        new StaticTupleFactoryGenerator(pebbleTemplateProcessor),
+                        new ZipperMethodGenerator(pebbleTemplateProcessor)
                 )
         );
     }
@@ -74,7 +77,8 @@ public class TupleSpecProcessor extends AbstractProcessor {
                 }
 
                 private boolean isTargetMethod(MethodInvocationTree node) {
-                    return node.getMethodSelect().toString().equals("DynamicTuple.of");
+                    return targetMethods
+                            .contains(node.getMethodSelect().toString());
                 }
             };
 

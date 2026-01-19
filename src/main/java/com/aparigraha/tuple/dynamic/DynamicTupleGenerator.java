@@ -7,20 +7,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 
 public class DynamicTupleGenerator {
     private final PebbleTemplateProcessor pebbleTemplateProcessor;
     private final StaticTupleFactoryGenerator staticTupleFactoryGenerator;
+    private final ZipperMethodGenerator zipperMethodGenerator;
 
 
     public DynamicTupleGenerator(
             PebbleTemplateProcessor pebbleTemplateProcessor,
-            StaticTupleFactoryGenerator staticTupleFactoryGenerator
+            StaticTupleFactoryGenerator staticTupleFactoryGenerator,
+            ZipperMethodGenerator zipperMethodGenerator
     ) {
         this.pebbleTemplateProcessor = pebbleTemplateProcessor;
         this.staticTupleFactoryGenerator = staticTupleFactoryGenerator;
+        this.zipperMethodGenerator = zipperMethodGenerator;
     }
 
 
@@ -28,6 +30,7 @@ public class DynamicTupleGenerator {
         List<String> tupleFactoryMethods = new ArrayList<>();
         for (int tupleSize: tupleSizes) {
             tupleFactoryMethods.add(staticTupleFactoryGenerator.generate(tupleSize));
+            tupleFactoryMethods.add(zipperMethodGenerator.generate(tupleSize));
         }
 
         return pebbleTemplateProcessor.process(

@@ -1,5 +1,8 @@
 package com.aparigraha.tuple.dynamic;
 
+import java.util.List;
+import java.util.stream.Stream;
+
 
 public class DynamicTuple {
     public static Object of(Object... args) {
