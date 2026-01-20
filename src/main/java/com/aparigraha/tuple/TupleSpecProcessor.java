@@ -91,10 +91,8 @@ public class TupleSpecProcessor extends OncePerLifecycleProcessor {
 
     private Set<Integer> extractTupleDefinitions(List<TypeElement> elements) {
         return elements.stream()
-                .map(element -> {
-                    var treePath = trees.getPath(element);
-                    return staticMethodScanner.scan(tupleDefinitions, treePath);
-                })
+                .map(trees::getPath)
+                .map(treePath -> staticMethodScanner.scan(tupleDefinitions, treePath))
                 .flatMap(Collection::stream)
                 .map(node -> node.getArguments().size())
                 .collect(Collectors.toSet());
