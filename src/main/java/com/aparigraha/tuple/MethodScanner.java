@@ -1,11 +1,9 @@
 package com.aparigraha.tuple;
 
 import com.sun.source.tree.MethodInvocationTree;
+import com.sun.source.util.TreePath;
 import com.sun.source.util.TreePathScanner;
-import com.sun.source.util.Trees;
 
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.lang.model.element.Element;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -14,8 +12,7 @@ import java.util.function.Predicate;
 public class MethodScanner {
     public List<MethodInvocationTree> scan(
             Predicate<MethodInvocationTree> isTargetMethod,
-            ProcessingEnvironment processingEnvironment,
-            Element rootElement
+            TreePath treePath
     ) {
         var treePathScanner = new TreePathScanner<List<MethodInvocationTree>, Void>() {
             @Override
@@ -37,7 +34,7 @@ public class MethodScanner {
         };
 
         return treePathScanner.scan(
-                Trees.instance(processingEnvironment).getPath(rootElement),
+                treePath,
                 null
         );
     }
