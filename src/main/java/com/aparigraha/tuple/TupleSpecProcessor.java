@@ -13,6 +13,7 @@ import com.sun.source.util.Trees;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
 import java.io.IOException;
@@ -20,11 +21,13 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.aparigraha.tuple.dynamic.templates.JavaTemplate.*;
+import static javax.lang.model.element.ElementKind.*;
 
 @SupportedAnnotationTypes("*")
 @SupportedSourceVersion(SourceVersion.RELEASE_21)
 public class TupleSpecProcessor extends OncePerLifecycleProcessor {
     private static final Set<String> targetMethods = Set.of(dynamicTupleFactoryMethod(), dynamicTupleZipMethod());
+    private static final Set<ElementKind> supportedRootElements = Set.of(CLASS, INTERFACE, RECORD);
 
     private final DynamicTupleGenerator dynamicTupleGenerator;
     private final TupleGenerator tupleGenerator;
@@ -63,7 +66,9 @@ public class TupleSpecProcessor extends OncePerLifecycleProcessor {
 
     @Override
     public boolean processFirstRound(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        var tupleDefinitions = extractTupleDefinitions(roundEnv);
+        var rootElements = extractValidRootElements(roundEnv);
+
+        var tupleDefinitions = extractTupleDefinitions(rootElements);
 
         createTupleClasses(tupleDefinitions);
 
@@ -72,9 +77,17 @@ public class TupleSpecProcessor extends OncePerLifecycleProcessor {
         return false;
     }
 
-    private Set<Integer> extractTupleDefinitions(RoundEnvironment roundEnv) {
+    private List<TypeElement> extractValidRootElements(RoundEnvironment roundEnv) {
         return roundEnv.getRootElements().stream()
-                .filter(element -> element.getKind().isClass() || element.getKind().isInterface())
+                .filter(element -> supportedRootElements.contains(element.getKind()))
+                .filter(element -> element instanceof TypeElement)
+                .map(element -> (TypeElement) element)
+                .toList();
+    }
+
+
+    private Set<Integer> extractTupleDefinitions(List<TypeElement> elements) {
+        return elements.stream()
                 .map(element -> trees.getPath(element))
                 .map(treePath ->
                         methodScanner.scan(
