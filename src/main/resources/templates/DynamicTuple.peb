@@ -8,5 +8,8 @@ public class {{ dynamicTupleClassName }} {
     public static Object {{ dynamicTupleFactoryMethodName }}(Object... args) {
         return DynamicTupleSeed.of(args);
     }
+    public static Stream<Object> {{ dynamicTupleZipMethodName }}(Stream<?>... streams) {
+        return DynamicTupleSeed.zip(streams);
+    }
 {{ staticFactoryMethods }}
 }

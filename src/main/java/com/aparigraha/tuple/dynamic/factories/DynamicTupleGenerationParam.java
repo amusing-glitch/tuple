@@ -7,5 +7,6 @@ public record DynamicTupleGenerationParam(
         String packageName,
         String dynamicTupleClassName,
         String dynamicTupleFactoryMethodName,
+        String dynamicTupleZipMethodName,
         Set<Integer> tupleSizes
 ) { }

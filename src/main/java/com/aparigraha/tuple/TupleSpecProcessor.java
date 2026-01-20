@@ -119,6 +119,7 @@ public class TupleSpecProcessor extends OncePerLifecycleProcessor {
                 packageName,
                 dynamicTupleClassName,
                 dynamicTupleFactoryMethodName,
+                dynamicTupleZipMethodName,
                 tupleDefinitions
         )).ifPresent(this::save);
     }
