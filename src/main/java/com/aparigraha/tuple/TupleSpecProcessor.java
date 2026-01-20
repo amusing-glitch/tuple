@@ -9,6 +9,7 @@ import com.aparigraha.tuple.dynamic.entities.TupleGenerationParams;
 import com.aparigraha.tuple.dynamic.entities.TupleGenerator;
 import com.aparigraha.tuple.dynamic.GeneratedClassSchema;
 import com.aparigraha.tuple.dynamic.templates.PebbleTemplateProcessor;
+import com.sun.source.util.Trees;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
@@ -29,6 +30,8 @@ public class TupleSpecProcessor extends OncePerLifecycleProcessor {
     private final TupleGenerator tupleGenerator;
     private final MethodScanner methodScanner;
     private final JavaFileWriter javaFileWriter;
+
+    private Trees trees;
 
     public TupleSpecProcessor(
             TupleGenerator tupleGenerator,
@@ -60,6 +63,11 @@ public class TupleSpecProcessor extends OncePerLifecycleProcessor {
         this(new PebbleTemplateProcessor("templates"));
     }
 
+    @Override
+    public synchronized void init(ProcessingEnvironment processingEnv) {
+        super.init(processingEnv);
+        trees = Trees.instance(processingEnv);
+    }
 
     @Override
     public boolean processFirstRound(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
@@ -75,7 +83,7 @@ public class TupleSpecProcessor extends OncePerLifecycleProcessor {
     private Set<Integer> extractTupleDefinitions(RoundEnvironment roundEnv) {
         return roundEnv.getRootElements().stream()
                 .filter(element -> element.getKind().isClass() || element.getKind().isInterface())
-                .map(element -> getTrees().getPath(element))
+                .map(element -> trees.getPath(element))
                 .map(treePath ->
                         methodScanner.scan(
                                 node -> targetMethods.contains(node.getMethodSelect().toString()),
