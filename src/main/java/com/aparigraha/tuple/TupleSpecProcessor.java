@@ -9,8 +9,6 @@ import com.aparigraha.tuple.dynamic.entities.TupleGenerationParams;
 import com.aparigraha.tuple.dynamic.entities.TupleGenerator;
 import com.aparigraha.tuple.dynamic.GeneratedClassSchema;
 import com.aparigraha.tuple.dynamic.templates.PebbleTemplateProcessor;
-import com.sun.source.tree.CompilationUnitTree;
-import com.sun.source.util.TreePath;
 import com.sun.source.util.Trees;
 
 import javax.annotation.processing.*;
@@ -29,6 +27,10 @@ import static javax.lang.model.element.ElementKind.*;
 @SupportedAnnotationTypes("*")
 @SupportedSourceVersion(SourceVersion.RELEASE_21)
 public class TupleSpecProcessor extends OncePerLifecycleProcessor {
+    private static final Set<StaticMethodSpec> tupleDefinitions = Set.of(
+            new StaticMethodSpec(packageName, dynamicTupleClassName, dynamicTupleFactoryMethodName),
+            new StaticMethodSpec(packageName, dynamicTupleClassName, dynamicTupleZipMethodName)
+    );
     private static final Set<ElementKind> supportedRootElements = Set.of(CLASS, INTERFACE, RECORD);
 
     private final DynamicTupleGenerator dynamicTupleGenerator;
@@ -70,9 +72,7 @@ public class TupleSpecProcessor extends OncePerLifecycleProcessor {
     public boolean processFirstRound(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         var rootElements = extractValidRootElements(roundEnv);
 
-        var imports = extractImports(rootElements);
-
-        var tupleDefinitions = extractTupleDefinitions(rootElements, imports);
+        var tupleDefinitions = extractTupleDefinitions(rootElements);
 
         createTupleClasses(tupleDefinitions);
 
@@ -89,59 +89,12 @@ public class TupleSpecProcessor extends OncePerLifecycleProcessor {
                 .toList();
     }
 
-    private Map<String, List<ImportStatement>> extractImports(List<TypeElement> rootElements) {
-        var imports = new HashMap<String, List<ImportStatement>>();
-        for (TypeElement rootElement: rootElements) {
-            TreePath path = trees.getPath(rootElement);
-            if (path == null) continue;
-            CompilationUnitTree compilationUnit = path.getCompilationUnit();
-            var currentImports = compilationUnit.getImports().stream()
-                    .map(importTree -> new ImportStatement(
-                            importTree.getQualifiedIdentifier().toString(),
-                            importTree.isStatic()
-                    )).toList();
-            imports.put(
-                    rootElement.getQualifiedName().toString(),
-                    currentImports
-            );
-        }
-        return imports;
-    }
 
-    private Set<Integer> extractTupleDefinitions(List<TypeElement> elements, Map<String, List<ImportStatement>> imports) {
+    private Set<Integer> extractTupleDefinitions(List<TypeElement> elements) {
         return elements.stream()
                 .map(element -> {
                     var treePath = trees.getPath(element);
-                    var currentImports = imports.get(element.getQualifiedName().toString());
-                    return staticMethodScanner.scan(
-                            node -> {
-                                String caller = node.getMethodSelect().toString();
-                                if (caller.startsWith(packageName + "." + dynamicTupleClassName)) {
-                                    return true;
-                                } else if (caller.startsWith(dynamicTupleClassName)) {
-                                    return currentImports.stream()
-                                            .anyMatch(importStatement ->
-                                                    !importStatement.isStatic() &&
-                                                    (
-                                                            Objects.equals(importStatement.identifier(), packageName + "*") ||
-                                                            Objects.equals(importStatement.identifier(), packageName + "." + dynamicTupleClassName)
-                                                    )
-                                            );
-                                } else if (caller.startsWith(dynamicTupleFactoryMethodName) || caller.startsWith(dynamicTupleZipMethodName)) {
-                                    return currentImports.stream()
-                                            .anyMatch(importStatement ->
-                                                importStatement.isStatic() &&
-                                                (
-                                                        Objects.equals(importStatement.identifier(), "com.aparigraha.tuple.dynamic.DynamicTuple.*") ||
-                                                        Objects.equals(importStatement.identifier(), "com.aparigraha.tuple.dynamic.DynamicTuple." + caller)
-                                                )
-                                            );
-                                } else {
-                                    return false;
-                                }
-                            },
-                            treePath
-                    );
+                    return staticMethodScanner.scan(tupleDefinitions, treePath);
                 })
                 .flatMap(Collection::stream)
                 .map(node -> node.getArguments().size())
@@ -218,8 +171,3 @@ class TupleSpecProcessorDependencies {
     public static final StaticMethodScanner STATIC_METHOD_SCANNER = new StaticMethodScanner();
     public static final JavaFileWriter JAVA_FILE_WRITER = new JavaFileWriter();
 }
-
-record ImportStatement(
-        String identifier,
-        boolean isStatic
-) {}
