@@ -1,6 +1,6 @@
 package com.aparigraha.tuple.javac;
 
-public record StaticMethodSpec(
+public record TupleDefinitionSpec(
         String packageName,
         String className,
         String methodName

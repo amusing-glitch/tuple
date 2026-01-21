@@ -8,7 +8,7 @@ import com.aparigraha.tuple.dynamic.entities.TupleGenerator;
 import com.aparigraha.tuple.dynamic.GeneratedClassSchema;
 import com.aparigraha.tuple.javac.TupleDefinition;
 import com.aparigraha.tuple.javac.TupleDefinitionScanner;
-import com.aparigraha.tuple.javac.StaticMethodSpec;
+import com.aparigraha.tuple.javac.TupleDefinitionSpec;
 import com.sun.source.util.Trees;
 
 import javax.annotation.processing.*;
@@ -27,9 +27,9 @@ import static javax.lang.model.element.ElementKind.*;
 @SupportedAnnotationTypes("*")
 @SupportedSourceVersion(SourceVersion.RELEASE_21)
 public class TupleSpecProcessor extends OncePerLifecycleProcessor {
-    private static final Set<StaticMethodSpec> tupleDefinitions = Set.of(
-            new StaticMethodSpec(packageName, dynamicTupleClassName, dynamicTupleFactoryMethodName),
-            new StaticMethodSpec(packageName, dynamicTupleClassName, dynamicTupleZipMethodName)
+    private static final Set<TupleDefinitionSpec> tupleDefinitionSpecs = Set.of(
+            new TupleDefinitionSpec(packageName, dynamicTupleClassName, dynamicTupleFactoryMethodName),
+            new TupleDefinitionSpec(packageName, dynamicTupleClassName, dynamicTupleZipMethodName)
     );
     private static final Set<ElementKind> supportedRootElements = Set.of(CLASS, INTERFACE, RECORD);
 
@@ -93,7 +93,7 @@ public class TupleSpecProcessor extends OncePerLifecycleProcessor {
     private Set<Integer> extractTupleDefinitions(List<TypeElement> elements) {
         return elements.stream()
                 .map(trees::getPath)
-                .map(treePath -> tupleDefinitionScanner.scan(tupleDefinitions, treePath))
+                .map(treePath -> tupleDefinitionScanner.scan(tupleDefinitionSpecs, treePath))
                 .flatMap(Collection::stream)
                 .map(TupleDefinition::argumentCount)
                 .collect(Collectors.toSet());

@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 public class TupleDefinitionScanner {
     public List<TupleDefinition> scan(
-            Set<StaticMethodSpec> methodSpecs,
+            Set<TupleDefinitionSpec> tupleDefinitionSpecs,
             TreePath treePath
     ) {
         var imports = extractImports(treePath);
@@ -20,13 +20,13 @@ public class TupleDefinitionScanner {
             @Override
             public List<TupleDefinition> visitMethodInvocation(MethodInvocationTree node, Void p) {
                 var result = super.visitMethodInvocation(node, p);
-                methodSpecs.stream()
+                tupleDefinitionSpecs.stream()
                         .filter(expectedSpec -> isTargetMethod(expectedSpec, node))
                         .findFirst()
-                        .ifPresent(staticMethodSpec ->
+                        .ifPresent(tupleDefinitionSpec ->
                             result.add(new TupleDefinition(
-                                    staticMethodSpec.className(),
-                                    staticMethodSpec.methodName(),
+                                    tupleDefinitionSpec.className(),
+                                    tupleDefinitionSpec.methodName(),
                                     node.getArguments().size()
                             ))
                         );
@@ -41,7 +41,7 @@ public class TupleDefinitionScanner {
                 return list1;
             }
 
-            private boolean isTargetMethod(StaticMethodSpec expectedSpec, MethodInvocationTree node) {
+            private boolean isTargetMethod(TupleDefinitionSpec expectedSpec, MethodInvocationTree node) {
                 String caller = node.getMethodSelect().toString();
                 if (caller.startsWith(expectedSpec.completeClassName() + "." + expectedSpec.methodName())) {
                     return true;
