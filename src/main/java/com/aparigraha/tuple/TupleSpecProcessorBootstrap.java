@@ -6,7 +6,7 @@ import com.aparigraha.tuple.dynamic.factories.DynamicTupleGenerator;
 import com.aparigraha.tuple.dynamic.factories.StaticTupleFactoryGenerator;
 import com.aparigraha.tuple.dynamic.factories.ZipperMethodGenerator;
 import com.aparigraha.tuple.dynamic.templates.PebbleTemplateProcessor;
-import com.aparigraha.tuple.javac.StaticMethodScanner;
+import com.aparigraha.tuple.javac.TupleDefinitionScanner;
 
 class TupleSpecProcessorBootstrap {
     private static final PebbleTemplateProcessor PEBBLE_TEMPLATE_PROCESSOR = new PebbleTemplateProcessor("templates");
@@ -16,6 +16,6 @@ class TupleSpecProcessorBootstrap {
             new StaticTupleFactoryGenerator(PEBBLE_TEMPLATE_PROCESSOR),
             new ZipperMethodGenerator(PEBBLE_TEMPLATE_PROCESSOR)
     );
-    public static final StaticMethodScanner STATIC_METHOD_SCANNER = new StaticMethodScanner();
+    public static final TupleDefinitionScanner TUPLE_DEFINITION_SCANNER = new TupleDefinitionScanner();
     public static final JavaFileWriter JAVA_FILE_WRITER = new JavaFileWriter();
 }

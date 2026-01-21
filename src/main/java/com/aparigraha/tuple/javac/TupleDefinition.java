@@ -1,7 +1,7 @@
 package com.aparigraha.tuple.javac;
 
 
-public record MatchingStaticMethod(
+public record TupleDefinition(
         String className,
         String methodName,
         int argumentCount

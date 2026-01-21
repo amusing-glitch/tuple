@@ -9,22 +9,22 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 
-public class StaticMethodScanner {
-    public List<MatchingStaticMethod> scan(
+public class TupleDefinitionScanner {
+    public List<TupleDefinition> scan(
             Set<StaticMethodSpec> methodSpecs,
             TreePath treePath
     ) {
         var imports = extractImports(treePath);
 
-        var treePathScanner = new TreePathScanner<List<MatchingStaticMethod>, Void>() {
+        var treePathScanner = new TreePathScanner<List<TupleDefinition>, Void>() {
             @Override
-            public List<MatchingStaticMethod> visitMethodInvocation(MethodInvocationTree node, Void p) {
+            public List<TupleDefinition> visitMethodInvocation(MethodInvocationTree node, Void p) {
                 var result = super.visitMethodInvocation(node, p);
                 methodSpecs.stream()
                         .filter(expectedSpec -> isTargetMethod(expectedSpec, node))
                         .findFirst()
                         .ifPresent(staticMethodSpec ->
-                            result.add(new MatchingStaticMethod(
+                            result.add(new TupleDefinition(
                                     staticMethodSpec.className(),
                                     staticMethodSpec.methodName(),
                                     node.getArguments().size()
@@ -34,9 +34,9 @@ public class StaticMethodScanner {
             }
 
             @Override
-            public List<MatchingStaticMethod> reduce(List<MatchingStaticMethod> r1, List<MatchingStaticMethod> r2) {
-                var list1 = r1 == null ? new ArrayList<MatchingStaticMethod>() : r1;
-                var list2 = r2 == null ? new ArrayList<MatchingStaticMethod>() : r2;
+            public List<TupleDefinition> reduce(List<TupleDefinition> r1, List<TupleDefinition> r2) {
+                var list1 = r1 == null ? new ArrayList<TupleDefinition>() : r1;
+                var list2 = r2 == null ? new ArrayList<TupleDefinition>() : r2;
                 list1.addAll(list2);
                 return list1;
             }

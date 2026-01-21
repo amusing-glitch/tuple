@@ -6,8 +6,8 @@ import com.aparigraha.tuple.dynamic.factories.DynamicTupleGenerationParam;
 import com.aparigraha.tuple.dynamic.entities.TupleGenerationParams;
 import com.aparigraha.tuple.dynamic.entities.TupleGenerator;
 import com.aparigraha.tuple.dynamic.GeneratedClassSchema;
-import com.aparigraha.tuple.javac.MatchingStaticMethod;
-import com.aparigraha.tuple.javac.StaticMethodScanner;
+import com.aparigraha.tuple.javac.TupleDefinition;
+import com.aparigraha.tuple.javac.TupleDefinitionScanner;
 import com.aparigraha.tuple.javac.StaticMethodSpec;
 import com.sun.source.util.Trees;
 
@@ -35,7 +35,7 @@ public class TupleSpecProcessor extends OncePerLifecycleProcessor {
 
     private final DynamicTupleGenerator dynamicTupleGenerator;
     private final TupleGenerator tupleGenerator;
-    private final StaticMethodScanner staticMethodScanner;
+    private final TupleDefinitionScanner tupleDefinitionScanner;
     private final JavaFileWriter javaFileWriter;
 
     private Trees trees;
@@ -43,12 +43,12 @@ public class TupleSpecProcessor extends OncePerLifecycleProcessor {
     public TupleSpecProcessor(
             TupleGenerator tupleGenerator,
             DynamicTupleGenerator dynamicTupleGenerator,
-            StaticMethodScanner staticMethodScanner,
+            TupleDefinitionScanner tupleDefinitionScanner,
             JavaFileWriter javaFileWriter
     ) {
         this.tupleGenerator = tupleGenerator;
         this.dynamicTupleGenerator = dynamicTupleGenerator;
-        this.staticMethodScanner = staticMethodScanner;
+        this.tupleDefinitionScanner = tupleDefinitionScanner;
         this.javaFileWriter = javaFileWriter;
     }
 
@@ -57,7 +57,7 @@ public class TupleSpecProcessor extends OncePerLifecycleProcessor {
         this(
                 TUPLE_GENERATOR,
                 DYNAMIC_TUPLE_GENERATOR,
-                STATIC_METHOD_SCANNER,
+                TUPLE_DEFINITION_SCANNER,
                 JAVA_FILE_WRITER
         );
     }
@@ -93,9 +93,9 @@ public class TupleSpecProcessor extends OncePerLifecycleProcessor {
     private Set<Integer> extractTupleDefinitions(List<TypeElement> elements) {
         return elements.stream()
                 .map(trees::getPath)
-                .map(treePath -> staticMethodScanner.scan(tupleDefinitions, treePath))
+                .map(treePath -> tupleDefinitionScanner.scan(tupleDefinitions, treePath))
                 .flatMap(Collection::stream)
-                .map(MatchingStaticMethod::argumentCount)
+                .map(TupleDefinition::argumentCount)
                 .collect(Collectors.toSet());
     }
 
