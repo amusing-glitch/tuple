@@ -43,9 +43,9 @@ public class StaticMethodScanner {
 
             private boolean isTargetMethod(StaticMethodSpec expectedSpec, MethodInvocationTree node) {
                 String caller = node.getMethodSelect().toString();
-                if (caller.startsWith(expectedSpec.completeClassName())) {
+                if (caller.startsWith(expectedSpec.completeClassName() + "." + expectedSpec.methodName())) {
                     return true;
-                } else if (caller.startsWith(expectedSpec.className())) {
+                } else if (caller.startsWith(expectedSpec.className() + "." + expectedSpec.methodName())) {
                     return imports.stream()
                             .anyMatch(importStatement ->
                                     !importStatement.isStatic() &&
