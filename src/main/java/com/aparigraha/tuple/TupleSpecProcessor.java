@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.aparigraha.tuple.SupportedTupleDefinitions.*;
 import static com.aparigraha.tuple.TupleSpecProcessorBootstrap.*;
 import static com.aparigraha.tuple.dynamic.templates.JavaTemplate.*;
 import static javax.lang.model.element.ElementKind.*;
@@ -29,9 +30,9 @@ import static javax.lang.model.element.ElementKind.*;
 @SupportedSourceVersion(SourceVersion.RELEASE_21)
 public class TupleSpecProcessor extends OncePerLifecycleProcessor {
     private static final Set<TupleDefinitionSpec> tupleDefinitionSpecs = Set.of(
-            new TupleDefinitionSpec(packageName, dynamicTupleClassName, dynamicTupleFactoryMethodName),
-            new TupleDefinitionSpec(packageName, dynamicTupleClassName, dynamicTupleZipMethodName),
-            new TupleDefinitionSpec(packageName, dynamicTupleClassName, namedTupleFactoryMethodName)
+            TUPLE_FACTORY_METHOD_SPEC,
+            TUPLE_ZIP_METHOD_SPEC,
+            NAMED_TUPLE_FACTORY_METHOD_SPEC
     );
     private static final Set<ElementKind> supportedRootElements = Set.of(CLASS, INTERFACE, RECORD);
 

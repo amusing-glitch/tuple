@@ -10,6 +10,8 @@ import javax.lang.model.element.Element;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.aparigraha.tuple.SupportedTupleDefinitions.NAMED_TUPLE_FACTORY_METHOD_SPEC;
+
 
 public class TupleDefinitionScanner {
     public TupleDefinitionScanResult scan(
@@ -27,12 +29,17 @@ public class TupleDefinitionScanner {
                 tupleDefinitionSpecs.stream()
                         .filter(expectedSpec -> isTargetMethod(expectedSpec, node))
                         .findFirst()
-                        .ifPresent(tupleDefinitionSpec ->
-                            result.add(new TupleDefinition(
-                                    tupleDefinitionSpec.className(),
-                                    tupleDefinitionSpec.methodName(),
-                                    node.getArguments().size()
-                            ))
+                        .ifPresent(tupleDefinitionSpec -> {
+                                if (tupleDefinitionSpec == NAMED_TUPLE_FACTORY_METHOD_SPEC) {
+                                    // TODO
+                                } else {
+                                    result.add(new TupleDefinition(
+                                            tupleDefinitionSpec.className(),
+                                            tupleDefinitionSpec.methodName(),
+                                            node.getArguments().size()
+                                    ));
+                                }
+                            }
                         );
                 return result;
             }
