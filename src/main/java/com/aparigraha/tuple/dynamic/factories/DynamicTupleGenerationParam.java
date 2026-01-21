@@ -8,5 +8,6 @@ public record DynamicTupleGenerationParam(
         String dynamicTupleClassName,
         String dynamicTupleFactoryMethodName,
         String dynamicTupleZipMethodName,
+        String namedTupleFactoryMethodName,
         Set<Integer> tupleSizes
 ) { }

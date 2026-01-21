@@ -26,6 +26,8 @@ class DynamicTupleGeneratorTest {
         import java.util.List;
         import java.util.stream.Stream;
         
+        import com.aparigraha.tuple.dynamic.factories.FieldSpec;
+        
 
         public class DynamicTuple {
             public static Object of(Object... args) {
@@ -34,6 +36,9 @@ class DynamicTupleGeneratorTest {
             public static Stream<Object> zip(Stream<?>... streams) {
                 return DynamicTupleSeed.zip(streams);
             }
+            public static <T> T named(Class<T> tClass, FieldSpec<?>... fieldSpecs) {
+                return DynamicTupleSeed.of(tClass, fieldSpecs);
+            }
         }
         """.trim();
         var schema = generator.generate(new DynamicTupleGenerationParam(
@@ -41,6 +46,7 @@ class DynamicTupleGeneratorTest {
                 "DynamicTuple",
                 "of",
                 "zip",
+                "named",
                 Set.of()
         ));
         assertEquals(expected, schema.javaCode());
@@ -63,6 +69,8 @@ class DynamicTupleGeneratorTest {
         
         import java.util.List;
         import java.util.stream.Stream;
+        
+        import com.aparigraha.tuple.dynamic.factories.FieldSpec;
 
 
         public class DynamicTuple {
@@ -71,6 +79,9 @@ class DynamicTupleGeneratorTest {
             }
             public static Stream<Object> zip(Stream<?>... streams) {
                 return DynamicTupleSeed.zip(streams);
+            }
+            public static <T> T named(Class<T> tClass, FieldSpec<?>... fieldSpecs) {
+                return DynamicTupleSeed.of(tClass, fieldSpecs);
             }
         public static <T0, T1> Tuple2<T0, T1> of(T0 item0, T1 item1) {
             return new Tuple2<>(item0, item1);
@@ -95,6 +106,7 @@ class DynamicTupleGeneratorTest {
                 "DynamicTuple",
                 "of",
                 "zip",
+                "named",
                 tupleSizes
         ));
         assertEquals(expected, schema.javaCode());

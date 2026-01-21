@@ -43,6 +43,7 @@ public class DynamicTupleGenerator {
                                 "dynamicTupleClassName", param.dynamicTupleClassName(),
                                 "dynamicTupleFactoryMethodName", param.dynamicTupleFactoryMethodName(),
                                 "dynamicTupleZipMethodName", param.dynamicTupleZipMethodName(),
+                                "namedTupleFactoryMethodName", param.namedTupleFactoryMethodName(),
                                 "staticFactoryMethods", String.join("\n", tupleFactoryMethods)
                         )
                 )

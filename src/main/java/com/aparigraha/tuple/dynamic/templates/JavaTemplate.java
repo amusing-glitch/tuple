@@ -14,6 +14,7 @@ public class JavaTemplate {
     public static final String dynamicTupleClassName = "DynamicTuple";
     public static final String dynamicTupleFactoryMethodName = "of";
     public static final String dynamicTupleZipMethodName = "zip";
+    public static final String namedTupleFactoryMethodName = "named";
     public static final String packageName = "com.aparigraha.tuple.dynamic";
 
 
