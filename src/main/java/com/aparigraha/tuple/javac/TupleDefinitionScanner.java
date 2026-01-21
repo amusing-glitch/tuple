@@ -4,21 +4,25 @@ import com.sun.source.tree.CompilationUnitTree;
 import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.util.TreePath;
 import com.sun.source.util.TreePathScanner;
+import com.sun.source.util.Trees;
 
+import javax.lang.model.element.Element;
 import java.util.*;
 import java.util.stream.Collectors;
 
 
 public class TupleDefinitionScanner {
-    public List<TupleDefinition> scan(
+    public TupleDefinitionScanResult scan(
             Set<TupleDefinitionSpec> tupleDefinitionSpecs,
-            TreePath treePath
+            Trees trees,
+            Element rootElement
     ) {
+        var treePath = trees.getPath(rootElement);
         var imports = extractImports(treePath);
 
-        var treePathScanner = new TreePathScanner<List<TupleDefinition>, Void>() {
+        var treePathScanner = new TreePathScanner<TupleDefinitionScanResult, Void>() {
             @Override
-            public List<TupleDefinition> visitMethodInvocation(MethodInvocationTree node, Void p) {
+            public TupleDefinitionScanResult visitMethodInvocation(MethodInvocationTree node, Void p) {
                 var result = super.visitMethodInvocation(node, p);
                 tupleDefinitionSpecs.stream()
                         .filter(expectedSpec -> isTargetMethod(expectedSpec, node))
@@ -34,11 +38,12 @@ public class TupleDefinitionScanner {
             }
 
             @Override
-            public List<TupleDefinition> reduce(List<TupleDefinition> r1, List<TupleDefinition> r2) {
-                var list1 = r1 == null ? new ArrayList<TupleDefinition>() : r1;
-                var list2 = r2 == null ? new ArrayList<TupleDefinition>() : r2;
-                list1.addAll(list2);
-                return list1;
+            public TupleDefinitionScanResult reduce(TupleDefinitionScanResult r1, TupleDefinitionScanResult r2) {
+                return getOrCreate(r1).add(getOrCreate(r2));
+            }
+
+            private static TupleDefinitionScanResult getOrCreate(TupleDefinitionScanResult scanResult) {
+                return scanResult == null ? new TupleDefinitionScanResult() : scanResult;
             }
 
             private boolean isTargetMethod(TupleDefinitionSpec expectedSpec, MethodInvocationTree node) {
