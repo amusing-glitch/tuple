@@ -10,26 +10,33 @@ import java.util.stream.Collectors;
 
 
 public class StaticMethodScanner {
-    public List<MethodInvocationTree> scan(
+    public List<MatchingStaticMethod> scan(
             Set<StaticMethodSpec> methodSpecs,
             TreePath treePath
     ) {
         var imports = extractImports(treePath);
 
-        var treePathScanner = new TreePathScanner<List<MethodInvocationTree>, Void>() {
+        var treePathScanner = new TreePathScanner<List<MatchingStaticMethod>, Void>() {
             @Override
-            public List<MethodInvocationTree> visitMethodInvocation(MethodInvocationTree node, Void p) {
+            public List<MatchingStaticMethod> visitMethodInvocation(MethodInvocationTree node, Void p) {
                 var result = super.visitMethodInvocation(node, p);
-                if (methodSpecs.stream().anyMatch(expectedSpec -> isTargetMethod(expectedSpec, node))) {
-                    result.add(node);
-                }
+                methodSpecs.stream()
+                        .filter(expectedSpec -> isTargetMethod(expectedSpec, node))
+                        .findFirst()
+                        .ifPresent(staticMethodSpec ->
+                            result.add(new MatchingStaticMethod(
+                                    staticMethodSpec.className(),
+                                    staticMethodSpec.methodName(),
+                                    node.getArguments().size()
+                            ))
+                        );
                 return result;
             }
 
             @Override
-            public List<MethodInvocationTree> reduce(List<MethodInvocationTree> r1, List<MethodInvocationTree> r2) {
-                var list1 = r1 == null ? new ArrayList<MethodInvocationTree>() : r1;
-                var list2 = r2 == null ? new ArrayList<MethodInvocationTree>() : r2;
+            public List<MatchingStaticMethod> reduce(List<MatchingStaticMethod> r1, List<MatchingStaticMethod> r2) {
+                var list1 = r1 == null ? new ArrayList<MatchingStaticMethod>() : r1;
+                var list2 = r2 == null ? new ArrayList<MatchingStaticMethod>() : r2;
                 list1.addAll(list2);
                 return list1;
             }

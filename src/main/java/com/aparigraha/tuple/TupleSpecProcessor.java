@@ -6,6 +6,7 @@ import com.aparigraha.tuple.dynamic.factories.DynamicTupleGenerationParam;
 import com.aparigraha.tuple.dynamic.entities.TupleGenerationParams;
 import com.aparigraha.tuple.dynamic.entities.TupleGenerator;
 import com.aparigraha.tuple.dynamic.GeneratedClassSchema;
+import com.aparigraha.tuple.javac.MatchingStaticMethod;
 import com.aparigraha.tuple.javac.StaticMethodScanner;
 import com.aparigraha.tuple.javac.StaticMethodSpec;
 import com.sun.source.util.Trees;
@@ -94,7 +95,7 @@ public class TupleSpecProcessor extends OncePerLifecycleProcessor {
                 .map(trees::getPath)
                 .map(treePath -> staticMethodScanner.scan(tupleDefinitions, treePath))
                 .flatMap(Collection::stream)
-                .map(node -> node.getArguments().size())
+                .map(MatchingStaticMethod::argumentCount)
                 .collect(Collectors.toSet());
     }
 
