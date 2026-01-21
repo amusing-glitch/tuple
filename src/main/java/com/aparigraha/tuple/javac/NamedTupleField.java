@@ -3,7 +3,7 @@ package com.aparigraha.tuple.javac;
 public record NamedTupleField(
         int index,
         String name,
-        Class<?> type
+        String type
 ) {
     public NamedTupleField {
         if (index < 0) {
