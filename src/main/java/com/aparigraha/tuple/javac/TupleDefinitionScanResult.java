@@ -22,4 +22,9 @@ public record TupleDefinitionScanResult (
         tupleDefinitions.add(tupleDefinition);
         return this;
     }
+
+    public TupleDefinitionScanResult add(NamedTupleDefinition tupleDefinition) {
+        namedTupleDefinitions.add(tupleDefinition);
+        return this;
+    }
 }

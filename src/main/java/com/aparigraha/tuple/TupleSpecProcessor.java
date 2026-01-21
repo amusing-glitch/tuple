@@ -95,7 +95,13 @@ public class TupleSpecProcessor extends OncePerLifecycleProcessor {
 
     private Set<Integer> extractTupleDefinitions(List<TypeElement> elements) {
         return elements.stream()
-                .map(element -> tupleDefinitionScanner.scan(tupleDefinitionSpecs, trees, element))
+                .map(element -> tupleDefinitionScanner.scan(
+                        tupleDefinitionSpecs,
+                        trees,
+                        processingEnv.getElementUtils(),
+                        element
+                )
+                )
                 .map(TupleDefinitionScanResult::tupleDefinitions)
                 .flatMap(Collection::stream)
                 .map(TupleDefinition::argumentCount)
