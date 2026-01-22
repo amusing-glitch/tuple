@@ -20,7 +20,7 @@ class TupleSpecProcessorNamedTupleIntegrationTest {
                 "import java.util.stream.Stream;",
                 "public class Main {",
                 "   public static void main(String[] args) {",
-                "       named(Student.class, name -> \"Alice\");",
+                "       named(Student.class, name -> \"Alice\", age -> 12);",
                 "   }",
                 "}"
         );
@@ -37,11 +37,11 @@ class TupleSpecProcessorNamedTupleIntegrationTest {
                         "package com.example;\n" +
                                 "\n" +
                                 "\n" +
-                                "public record Student<T0> (T0 name) {\n" +
+                                "public record Student<T0, T1> (T0 name, T1 age) {\n" +
                                 "    @Override\n" +
                                 "    public boolean equals(Object obj) {\n" +
-                                "        if (obj instanceof Student<?> that) {\n" +
-                                "            return this.name == that.name;\n" +
+                                "        if (obj instanceof Student<?, ?> that) {\n" +
+                                "            return this.name == that.name && this.age == that.age;\n" +
                                 "        } else return false;\n" +
                                 "    }\n" +
                                 "}"
