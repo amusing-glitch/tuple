@@ -5,10 +5,7 @@ import com.aparigraha.tuple.dynamic.entities.*;
 import com.aparigraha.tuple.dynamic.factories.DynamicTupleGenerator;
 import com.aparigraha.tuple.dynamic.factories.DynamicTupleGenerationParam;
 import com.aparigraha.tuple.dynamic.GeneratedClassSchema;
-import com.aparigraha.tuple.javac.NumberedTupleDefinition;
-import com.aparigraha.tuple.javac.TupleDefinitionScanResult;
-import com.aparigraha.tuple.javac.TupleDefinitionScanner;
-import com.aparigraha.tuple.javac.TupleDefinitionSpec;
+import com.aparigraha.tuple.javac.*;
 import com.sun.source.util.Trees;
 
 import javax.annotation.processing.*;
@@ -37,7 +34,6 @@ public class TupleSpecProcessor extends OncePerLifecycleProcessor {
 
     private final DynamicTupleGenerator dynamicTupleGenerator;
     private final TupleGenerator tupleGenerator;
-    private final NamedTupleGenerator namedTupleGenerator;
     private final TupleDefinitionScanner tupleDefinitionScanner;
     private final JavaFileWriter javaFileWriter;
 
@@ -45,13 +41,11 @@ public class TupleSpecProcessor extends OncePerLifecycleProcessor {
 
     public TupleSpecProcessor(
             TupleGenerator tupleGenerator,
-            NamedTupleGenerator namedTupleGenerator,
             DynamicTupleGenerator dynamicTupleGenerator,
             TupleDefinitionScanner tupleDefinitionScanner,
             JavaFileWriter javaFileWriter
     ) {
         this.tupleGenerator = tupleGenerator;
-        this.namedTupleGenerator = namedTupleGenerator;
         this.dynamicTupleGenerator = dynamicTupleGenerator;
         this.tupleDefinitionScanner = tupleDefinitionScanner;
         this.javaFileWriter = javaFileWriter;
@@ -61,7 +55,6 @@ public class TupleSpecProcessor extends OncePerLifecycleProcessor {
     public TupleSpecProcessor() {
         this(
                 TUPLE_GENERATOR,
-                NAMED_TUPLE_GENERATOR,
                 DYNAMIC_TUPLE_GENERATOR,
                 TUPLE_DEFINITION_SCANNER,
                 JAVA_FILE_WRITER
@@ -123,19 +116,16 @@ public class TupleSpecProcessor extends OncePerLifecycleProcessor {
 
         scanResult.namedTupleDefinitions().stream()
                 .map(definition ->
-                        new NamedTupleGenerationParams(
+                        new TupleGenerationParams(
                                 definition.packageName(),
                                 definition.className(),
-                                definition.fields().stream().map( fieldDefinition ->
-                                        new NamedTupleGenerationFieldParams(
-                                                fieldDefinition.index(),
-                                                fieldDefinition.type(),
-                                                fieldDefinition.name()
-                                        )
-                                ).collect(Collectors.toSet())
+                                definition.fields().stream()
+                                        .sorted(Comparator.comparingInt(NamedTupleField::index))
+                                        .map(NamedTupleField::name)
+                                        .toList()
                         )
                 )
-                .map(this::generateNamedTupleClass)
+                .map(this::generateTupleClass)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .forEach(this::save);
@@ -157,18 +147,6 @@ public class TupleSpecProcessor extends OncePerLifecycleProcessor {
     private Optional<GeneratedClassSchema> generateTupleClass(TupleGenerationParams params) {
         try {
             return Optional.of(tupleGenerator.generate(params));
-        } catch (IOException e) {
-            processingEnv.getMessager().printMessage(
-                    Diagnostic.Kind.ERROR,
-                    "Error creating Tuple class: " + params.className() + "\n" + e.getMessage()
-            );
-            return Optional.empty();
-        }
-    }
-
-    private Optional<GeneratedClassSchema> generateNamedTupleClass(NamedTupleGenerationParams params) {
-        try {
-            return Optional.of(namedTupleGenerator.generate(params));
         } catch (IOException e) {
             processingEnv.getMessager().printMessage(
                     Diagnostic.Kind.ERROR,

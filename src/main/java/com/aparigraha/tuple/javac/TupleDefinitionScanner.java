@@ -98,24 +98,8 @@ public class TupleDefinitionScanner {
                         .toString();
             }
 
-            private String type(LambdaExpressionTree argument) {
-                var lambdaPath = getCurrentPath();
-                trees.getElement(lambdaPath);
-                TreePath bodyPath = new TreePath(lambdaPath, argument.getBody());
-                return trees.getTypeMirror(bodyPath).toString();
-            }
-
             private String className(ExpressionTree argument) {
-                var currentPath = getCurrentPath();
-                trees.getElement(currentPath);
-                TreePath argumentPath = new TreePath(currentPath, argument);
-                TypeMirror argType = trees.getTypeMirror(argumentPath);
-                if (argType instanceof DeclaredType declaredType) {
-                    return declaredType.toString().replaceAll("\\.class$", "");
-                } else {
-                    // TODO: Throw exception if unable to get class name
-                    return null;
-                }
+                return argument.toString().replaceAll("\\.class$", "");
             }
 
             private NamedTupleDefinition processArguments(MethodInvocationTree node, TupleDefinitionSpec spec) {
@@ -135,7 +119,7 @@ public class TupleDefinitionScanner {
                                 new NamedTupleField(
                                         indexedArgument.index(),
                                         fieldName(indexedArgument.value()),
-                                        type(indexedArgument.value())
+                                        null
                                 )
                         )
                         .collect(Collectors.toSet());
