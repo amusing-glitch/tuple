@@ -1,6 +1,7 @@
 package com.aparigraha.tuple;
 
 import com.aparigraha.tuple.dynamic.JavaFileWriter;
+import com.aparigraha.tuple.dynamic.entities.NamedTupleGenerator;
 import com.aparigraha.tuple.dynamic.factories.DynamicTupleGenerator;
 import com.aparigraha.tuple.dynamic.factories.DynamicTupleGenerationParam;
 import com.aparigraha.tuple.dynamic.entities.TupleGenerationParams;
@@ -38,6 +39,7 @@ public class TupleSpecProcessor extends OncePerLifecycleProcessor {
 
     private final DynamicTupleGenerator dynamicTupleGenerator;
     private final TupleGenerator tupleGenerator;
+    private final NamedTupleGenerator namedTupleGenerator;
     private final TupleDefinitionScanner tupleDefinitionScanner;
     private final JavaFileWriter javaFileWriter;
 
@@ -45,11 +47,13 @@ public class TupleSpecProcessor extends OncePerLifecycleProcessor {
 
     public TupleSpecProcessor(
             TupleGenerator tupleGenerator,
+            NamedTupleGenerator namedTupleGenerator,
             DynamicTupleGenerator dynamicTupleGenerator,
             TupleDefinitionScanner tupleDefinitionScanner,
             JavaFileWriter javaFileWriter
     ) {
         this.tupleGenerator = tupleGenerator;
+        this.namedTupleGenerator = namedTupleGenerator;
         this.dynamicTupleGenerator = dynamicTupleGenerator;
         this.tupleDefinitionScanner = tupleDefinitionScanner;
         this.javaFileWriter = javaFileWriter;
@@ -59,6 +63,7 @@ public class TupleSpecProcessor extends OncePerLifecycleProcessor {
     public TupleSpecProcessor() {
         this(
                 TUPLE_GENERATOR,
+                NAMED_TUPLE_GENERATOR,
                 DYNAMIC_TUPLE_GENERATOR,
                 TUPLE_DEFINITION_SCANNER,
                 JAVA_FILE_WRITER

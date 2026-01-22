@@ -1,5 +1,6 @@
 package com.aparigraha.tuple.dynamic.templates;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -24,6 +25,14 @@ public class JavaTemplate {
 
     public static String dynamicTupleZipMethod() {
         return dynamicTupleClassName + "." + dynamicTupleZipMethodName;
+    }
+
+    public static String fields(String[][] fields) {
+        return csvOf(Arrays.stream(fields).map(field -> field(field[0], field[1])));
+    }
+
+    public static String field(String type, String name) {
+        return "%s %s".formatted(type, name);
     }
 
     public static String genericsSequence(int size) {

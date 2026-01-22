@@ -1,0 +1,8 @@
+package {{ packageName }};
+
+
+public record {{ className }} (
+    {{ fields }}
+
+) {
+}
