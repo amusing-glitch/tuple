@@ -98,42 +98,42 @@ public class TupleSpecProcessor extends OncePerLifecycleProcessor {
     }
 
 
-    private Set<Integer> extractTupleDefinitions(List<TypeElement> elements) {
+    private TupleDefinitionScanResult extractTupleDefinitions(List<TypeElement> elements) {
         return elements.stream()
                 .map(element -> tupleDefinitionScanner.scan(
                         tupleDefinitionSpecs,
                         trees,
                         processingEnv.getElementUtils(),
                         element
-                )
-                )
-                .map(TupleDefinitionScanResult::numberedTupleDefinitions)
-                .flatMap(Collection::stream)
-                .map(NumberedTupleDefinition::argumentCount)
-                .collect(Collectors.toSet());
+                ))
+                .reduce(TupleDefinitionScanResult::add)
+                .orElseGet(TupleDefinitionScanResult::new);
     }
 
-    private void createTupleClasses(Set<Integer> tupleDefinitions) {
-        tupleDefinitions.stream()
-                .map(size -> new TupleGenerationParams(
+
+    private void createTupleClasses(TupleDefinitionScanResult TupleDefinitionScanResult) {
+        TupleDefinitionScanResult.numberedTupleDefinitions().stream()
+                .map(definition -> new TupleGenerationParams(
                         packageName,
-                        classPrefix + size,
+                        className(definition.argumentCount()),
                         parameterPrefix,
-                        size
+                        definition.argumentCount()
                 )).map(this::generateTupleClass)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .forEach(this::save);
     }
 
-    private void createFactoryClass(Set<Integer> tupleDefinitions) {
+    private void createFactoryClass(TupleDefinitionScanResult scanResult) {
         generateDynamicTupleClass(new DynamicTupleGenerationParam(
                 packageName,
                 dynamicTupleClassName,
                 dynamicTupleFactoryMethodName,
                 dynamicTupleZipMethodName,
                 namedTupleFactoryMethodName,
-                tupleDefinitions
+                scanResult.numberedTupleDefinitions().stream()
+                        .map(NumberedTupleDefinition::argumentCount)
+                        .collect(Collectors.toSet())
         )).ifPresent(this::save);
     }
 
