@@ -140,7 +140,8 @@ public class TupleSpecProcessor extends OncePerLifecycleProcessor {
                 namedTupleFactoryMethodName,
                 scanResult.numberedTupleDefinitions().stream()
                         .map(NumberedTupleDefinition::argumentCount)
-                        .collect(Collectors.toSet())
+                        .collect(Collectors.toSet()),
+                scanResult.namedTupleDefinitions()
         )).ifPresent(this::save);
     }
 

@@ -1,11 +1,12 @@
 package com.aparigraha.tuple.dynamic.factories;
 
 import com.aparigraha.tuple.dynamic.templates.PebbleTemplateProcessor;
+import com.aparigraha.tuple.javac.NamedTupleDefinition;
 import com.aparigraha.tuple.javac.NamedTupleField;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -17,9 +18,14 @@ class StaticNamedTupleFactoryGeneratorTest {
                 new PebbleTemplateProcessor("templates")
         );
 
-        var content = generator.generate("Student", List.of(
-                new NamedTupleField(0, "name", null),
-                new NamedTupleField(1, "age", null)
+        var content = generator.generate(new NamedTupleDefinition(
+                "",
+                "Student",
+                "",
+                Set.of(
+                        new NamedTupleField(0, "name", null),
+                        new NamedTupleField(1, "age", null)
+                )
         ));
 
         var expected = """

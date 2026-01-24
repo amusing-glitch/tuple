@@ -5,6 +5,9 @@ import java.util.stream.Stream;
 
 import com.aparigraha.tuple.dynamic.factories.FieldSpec;
 
+{{ imports }}
+
+
 
 public class {{ dynamicTupleClassName }} {
     public static Object {{ dynamicTupleFactoryMethodName }}(Object... args) {

@@ -8,4 +8,7 @@ public record NamedTupleDefinition(
         String methodName,
         Set<NamedTupleField> fields
 ) {
+    public String qualifiedName() {
+        return "%s.%s".formatted(packageName, className);
+    }
 }

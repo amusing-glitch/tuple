@@ -2,6 +2,7 @@ package com.aparigraha.tuple.dynamic.factories;
 
 import com.aparigraha.tuple.dynamic.templates.JavaTemplate;
 import com.aparigraha.tuple.dynamic.templates.PebbleTemplateProcessor;
+import com.aparigraha.tuple.javac.NamedTupleDefinition;
 import com.aparigraha.tuple.javac.NamedTupleField;
 
 import java.io.IOException;
@@ -20,25 +21,25 @@ public class StaticNamedTupleFactoryGenerator {
         this.pebbleTemplateProcessor = pebbleTemplateProcessor;
     }
 
-    public String generate(String className, List<NamedTupleField> fields) throws IOException {
-        var orderedFields = fields.stream().sorted(Comparator.comparingInt(NamedTupleField::index)).toList();
-        var generics =  generics(fields.size()).toList();
+    public String generate(NamedTupleDefinition namedTupleDefinition) throws IOException {
+        var orderedFields = namedTupleDefinition.fields().stream().sorted(Comparator.comparingInt(NamedTupleField::index)).toList();
+        var generics =  generics(namedTupleDefinition.fields().size()).toList();
         return pebbleTemplateProcessor
                 .process(
                         "StaticNamedTupleFactory.peb",
                         Map.of(
-                                "genericsSequence", genericsSequence(fields.size()),
-                                "className", className,
+                                "genericsSequence", genericsSequence(namedTupleDefinition.fields().size()),
+                                "className", namedTupleDefinition.className(),
                                 "methodName", namedTupleFactoryMethodName,
                                 "fieldSpecParameters", csvOf(
-                                        IntStream.range(0, fields.size()).boxed()
+                                        IntStream.range(0, namedTupleDefinition.fields().size()).boxed()
                                                 .map(index -> namedTupleFactoryMethodParam(generics.get(index), orderedFields.get(index).name()))
                                 ),
                                 "fieldSpecValues", csvOf(
                                         orderedFields.stream()
                                                 .map(NamedTupleField::name).map(JavaTemplate::namedTupleConstructorParam)
                                 ),
-                                "genericsParameter", genericsParameter(fields.size())
+                                "genericsParameter", genericsParameter(namedTupleDefinition.fields().size())
                         )
                 );
     }

@@ -46,5 +46,35 @@ class TupleSpecProcessorNamedTupleIntegrationTest {
                                 "    }\n" +
                                 "}"
                 ));
+
+        assertThat(compilation)
+                .generatedSourceFile("com.aparigraha.tuple.dynamic.DynamicTuple")
+                .hasSourceEquivalentTo(JavaFileObjects.forSourceLines(
+                        "com.aparigraha.tuple.dynamic.DynamicTuple",
+                        "package com.aparigraha.tuple.dynamic;",
+                        "",
+                        "import java.util.List;",
+                        "import java.util.stream.Stream;",
+                        "",
+                        "import com.aparigraha.tuple.dynamic.factories.FieldSpec;",
+                        "",
+                        "import com.example.Student;",
+                        "",
+                        "public class DynamicTuple {",
+                        "    public static Object of(Object... args) {",
+                        "        return DynamicTupleSeed.of(args);",
+                        "    }",
+                        "    public static Stream<Object> zip(Stream<?>... streams) {",
+                        "        return DynamicTupleSeed.zip(streams);",
+                        "    }",
+                        "    public static <T> T named(Class<T> tClass, FieldSpec<?>... fieldSpecs) {",
+                        "        return DynamicTupleSeed.of(tClass, fieldSpecs);",
+                        "    }",
+                        "    public static <T0, T1> Student<T0, T1> named(Class<Student> tClass, FieldSpec<T0> name, FieldSpec<T1> age) {",
+                        "        return new Student<>(name.value(null), age.value(null));",
+                        "    }",
+                        "    ",
+                        "}"
+                ));
     }
 }
