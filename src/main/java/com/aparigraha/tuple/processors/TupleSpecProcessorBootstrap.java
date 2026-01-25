@@ -18,6 +18,6 @@ class TupleSpecProcessorBootstrap {
             new ZipperMethodGenerator(PEBBLE_TEMPLATE_PROCESSOR),
             new StaticNamedTupleFactoryGenerator(PEBBLE_TEMPLATE_PROCESSOR)
     );
-    public static final TupleDefinitionScanner TUPLE_DEFINITION_SCANNER = new TupleDefinitionScanner();
+    public static final TupleDefinitionScanner TUPLE_DEFINITION_SCANNER = new TupleDefinitionScanner(false);
     public static final JavaFileWriter JAVA_FILE_WRITER = new JavaFileWriter();
 }

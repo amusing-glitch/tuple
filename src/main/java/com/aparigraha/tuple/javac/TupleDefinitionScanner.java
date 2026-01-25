@@ -18,6 +18,12 @@ import static com.aparigraha.tuple.processors.SupportedTupleDefinitions.NAMED_TU
 
 
 public class TupleDefinitionScanner {
+    private final boolean fetchTypes;
+
+    public TupleDefinitionScanner(boolean fetchTypes) {
+        this.fetchTypes = fetchTypes;
+    }
+
     public TupleDefinitionScanResult scan(
             Set<TupleDefinitionSpec> tupleDefinitionSpecs,
             Trees trees,
