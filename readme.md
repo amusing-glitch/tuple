@@ -12,6 +12,7 @@ Since it's dynamic, if the usage of the Tuple is removed, the generated Tuple cl
 Tuples can be widely used in **Streams**, as it involves multiple transformations in different stages. And creating classes for each of those stage complicates the code.
 
 ## Basic Usage
+### Numbered Tuple
 1. A static method `Object DynamicTuple.of(Object... args)` is given by the library initially.
 ```java
 public class DynamicTuple {
@@ -42,7 +43,7 @@ public class DynamicTuple {
 7. **Important Note**
    Refrain from creating objects with `new Tuple3("Alice", 28, "Wonderland")`, as this won't trigger tuple class creation. This piece of code will break if there are no occurrences of `DynamicTuple.of(T0 item0, T1 item1, T2 item2)`.
 
-### Example
+#### Example
 Let's say I want a tuple to store a Student's name (String), age (Integer) and if they belong to hostel (Boolean).
 1. Call `DynamicTuple.of` with necessary arguments.
 ```java
@@ -67,6 +68,34 @@ String name = studentInfo.item0();
 Integer age = studentInfo.item1();
 Boolean isHosteler = studentInfo.item1();
 ```
+### Named Tuples
+1. A static method `DynamicTuple.named` is given by the library initially.
+```java
+public class DynamicTuple {
+    public static T named(Class<T> tClass, FieldSpec<?>... fieldSpecs) {}
+}
+```
+2. Give a unique class name considering the current package as the first parameter.
+3. The rest of the parameters are the fields of the tuple, defined by the lambdas of FieldSpec<T> interface. The name of the field is dictated by the lambda's variable name.
+```java
+@FunctionalInterface
+public interface FieldSpec<T> {
+    T value(Object fieldName);
+}
+```
+#### Example
+The below code generates a student record with two fields name and age within the same package.
+```java
+Student student = DynamicTuple.named(Student.class, name -> "Alice", age -> 12);
+```
+The fields are immutable and can be accessed via,
+```java
+String name = student.name();
+int age = student.age();
+```
+#### Important Note
+1. For the Student class to be auto generated, the code has to be compiled again.
+2. These lambdas are just for specifying the field name. Both **field order and type** has to be preserved if this same Student class is referenced as the first param of the named tuple, within the same package. Else compilation would fail.
 
 ## Stream support - Zip Streams
 1. A static method `Stream<Object> DynamicTuple.zip(Stream<Object>... streams)` is given by the library initially.
