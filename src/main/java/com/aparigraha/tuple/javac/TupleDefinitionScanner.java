@@ -9,6 +9,7 @@ import com.sun.source.util.TreePathScanner;
 import com.sun.source.util.Trees;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -28,7 +29,8 @@ public class TupleDefinitionScanner {
             Set<TupleDefinitionSpec> tupleDefinitionSpecs,
             Trees trees,
             Elements elementUtils,
-            Element rootElement
+            Element rootElement,
+            boolean extractType
     ) {
         var treePath = trees.getPath(rootElement);
         var imports = extractImports(treePath);
@@ -106,6 +108,12 @@ public class TupleDefinitionScanner {
                 return argument.toString().replaceAll("\\.class$", "");
             }
 
+            private String extractType(LambdaExpressionTree argument) {
+                var treePath = trees.getPath(getCurrentPath().getCompilationUnit(), argument.getBody());
+                trees.getElement(treePath);
+                return trees.getTypeMirror(treePath).toString();
+            }
+
             private NamedTupleDefinition processArguments(MethodInvocationTree node, TupleDefinitionSpec spec) {
                 // TODO: Throw exception when remaining args are not FieldSpec<T>
                 record IndexedValue<T>(int index, T value) {}
@@ -123,7 +131,7 @@ public class TupleDefinitionScanner {
                                 new NamedTupleField(
                                         indexedArgument.index(),
                                         fieldName(indexedArgument.value()),
-                                        null
+                                        extractType ? extractType(indexedArgument.value()) : null
                                 )
                         )
                         .collect(Collectors.toSet());

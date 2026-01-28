@@ -6,6 +6,9 @@ import com.aparigraha.tuple.dynamic.factories.DynamicTupleGenerator;
 import com.aparigraha.tuple.dynamic.factories.DynamicTupleGenerationParam;
 import com.aparigraha.tuple.dynamic.GeneratedClassSchema;
 import com.aparigraha.tuple.javac.*;
+import com.sun.source.util.JavacTask;
+import com.sun.source.util.TaskEvent;
+import com.sun.source.util.TaskListener;
 import com.sun.source.util.Trees;
 
 import javax.annotation.processing.*;
@@ -77,6 +80,29 @@ public class TupleSpecProcessor extends OncePerLifecycleProcessor {
 
         createFactoryClass(tupleDefinitions);
 
+        JavacTask task = JavacTask.instance(processingEnv);
+        task.addTaskListener(new TaskListener() {
+            @Override
+            public void started(TaskEvent e) {
+                if (e.getKind() == TaskEvent.Kind.ANALYZE) {
+                    System.out.println("Analyzing file: " + e.getSourceFile().getName());
+                    var result = tupleDefinitionScanner.scan(
+                            tupleDefinitionSpecs,
+                            trees,
+                            processingEnv.getElementUtils(),
+                            e.getTypeElement(),
+                            true
+                    );
+                    System.out.println(result);
+                }
+            }
+
+            @Override
+            public void finished(TaskEvent e) {
+                // No-op for this example
+            }
+        });
+
         return false;
     }
 
@@ -95,7 +121,8 @@ public class TupleSpecProcessor extends OncePerLifecycleProcessor {
                         tupleDefinitionSpecs,
                         trees,
                         processingEnv.getElementUtils(),
-                        element
+                        element,
+                        false
                 ))
                 .reduce(TupleDefinitionScanResult::add)
                 .orElseGet(TupleDefinitionScanResult::new);
