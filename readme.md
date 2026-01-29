@@ -1,4 +1,4 @@
-# com.aparigraha.tuple
+# io.github.amusing_glitch.tuple
 Creates "Strongly Typed" Tuples with variable lengths in the compile time.
 
 ## Use case

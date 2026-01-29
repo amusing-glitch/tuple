@@ -3,7 +3,7 @@ package {{ packageName }};
 import java.util.List;
 import java.util.stream.Stream;
 
-import com.aparigraha.tuple.dynamic.factories.FieldSpec;
+import io.github.amusing_glitch.tuple.dynamic.factories.FieldSpec;
 
 {{ imports }}
 
