@@ -90,7 +90,7 @@ public static final Student type = null;
 ```
 #### Example
 ```java
-Student student = DynamicTuple.named(Student.type, name -> "Alice", age -> 12);
+Student<String, Integer> student = DynamicTuple.named(Student.type, name -> "Alice", age -> 12);
 ```
 The above code generates a student record with two fields name and age within the same package.
 ```java
