@@ -89,9 +89,15 @@ public interface FieldSpec<T> {
 public static final Student type = null;
 ```
 #### Example
-The below code generates a student record with two fields name and age within the same package.
 ```java
 Student student = DynamicTuple.named(Student.type, name -> "Alice", age -> 12);
+```
+The above code generates a student record with two fields name and age within the same package.
+```java
+public record Student<T0, T1> (
+        T0 name,
+        T1 age
+) {}
 ```
 The fields are immutable and can be accessed via,
 ```java
@@ -101,6 +107,8 @@ int age = student.age();
 #### Important Note
 1. For the Student class to be auto generated, the code has to be compiled again.
 2. These lambdas are just for specifying the field name. Both **field order and type** has to be preserved if this same Student class is referenced as the first param of the named tuple, within the same package. Else compilation would fail.
+3. The named tuple classes are not created with their concrete types. The actual type can't be fetched by an annotation processor. By forcefully fetching the type, the state of the compiler corrupts, failing the compilation inevitably. Hence, generics are used. 
+4. This is tacked by a validator in the final compilation phase. This validates if the arguments of same tuple classes are in the same order with the same types. Any inconsistency will fail the compilation.
 
 ## Stream support - Zip Streams
 ### Numbered Tuples
