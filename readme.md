@@ -69,6 +69,7 @@ Integer age = studentInfo.item1();
 Boolean isHosteler = studentInfo.item1();
 ```
 ### Named Tuples
+If one feels to have control over the placeholder(field) names of the tuple, they can use named tuples.
 1. A static method `DynamicTuple.named` is given by the library initially.
 ```java
 public class DynamicTuple {
