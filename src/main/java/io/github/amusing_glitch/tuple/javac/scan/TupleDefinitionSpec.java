@@ -1,4 +1,4 @@
-package io.github.amusing_glitch.tuple.javac;
+package io.github.amusing_glitch.tuple.javac.scan;
 
 public record TupleDefinitionSpec(
         String packageName,

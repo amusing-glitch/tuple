@@ -1,14 +1,15 @@
 package io.github.amusing_glitch.tuple.processors;
 
 import io.github.amusing_glitch.tuple.dynamic.JavaFileWriter;
-import io.github.amusing_glitch.tuple.dynamic.entities.*;
 import io.github.amusing_glitch.tuple.dynamic.entities.TupleGenerationParams;
 import io.github.amusing_glitch.tuple.dynamic.entities.TupleGenerator;
 import io.github.amusing_glitch.tuple.dynamic.factories.DynamicTupleGenerator;
 import io.github.amusing_glitch.tuple.dynamic.factories.DynamicTupleGenerationParam;
 import io.github.amusing_glitch.tuple.dynamic.GeneratedClassSchema;
-import io.github.amusing_glitch.tuple.javac.*;
-import io.github.amusing_glitch.tuple.javac.*;
+import io.github.amusing_glitch.tuple.javac.scan.*;
+import io.github.amusing_glitch.tuple.javac.scan.result.NamedTupleField;
+import io.github.amusing_glitch.tuple.javac.scan.result.NumberedTupleDefinition;
+import io.github.amusing_glitch.tuple.javac.scan.result.TupleDefinitionScanResult;
 import io.github.amusing_glitch.tuple.validators.Validator;
 import com.sun.source.util.JavacTask;
 import com.sun.source.util.TaskEvent;
@@ -24,7 +25,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static io.github.amusing_glitch.tuple.processors.SupportedTupleDefinitions.*;
+import static io.github.amusing_glitch.tuple.javac.scan.SupportedTupleDefinitions.*;
 import static io.github.amusing_glitch.tuple.processors.TupleSpecProcessorBootstrap.*;
 import static io.github.amusing_glitch.tuple.dynamic.templates.JavaTemplate.*;
 import static javax.lang.model.element.ElementKind.*;

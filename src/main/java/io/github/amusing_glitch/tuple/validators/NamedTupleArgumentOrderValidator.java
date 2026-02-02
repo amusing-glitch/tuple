@@ -1,7 +1,7 @@
 package io.github.amusing_glitch.tuple.validators;
 
-import io.github.amusing_glitch.tuple.javac.NamedTupleDefinition;
-import io.github.amusing_glitch.tuple.javac.TupleDefinitionScanResult;
+import io.github.amusing_glitch.tuple.javac.scan.result.NamedTupleDefinition;
+import io.github.amusing_glitch.tuple.javac.scan.result.TupleDefinitionScanResult;
 
 import java.util.stream.Collectors;
 

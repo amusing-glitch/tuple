@@ -1,6 +1,4 @@
-package io.github.amusing_glitch.tuple.processors;
-
-import io.github.amusing_glitch.tuple.javac.TupleDefinitionSpec;
+package io.github.amusing_glitch.tuple.javac.scan;
 
 import static io.github.amusing_glitch.tuple.dynamic.templates.JavaTemplate.*;
 

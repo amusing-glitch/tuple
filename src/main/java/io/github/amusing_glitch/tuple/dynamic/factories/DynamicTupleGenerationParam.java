@@ -1,6 +1,6 @@
 package io.github.amusing_glitch.tuple.dynamic.factories;
 
-import io.github.amusing_glitch.tuple.javac.NamedTupleDefinition;
+import io.github.amusing_glitch.tuple.javac.scan.result.NamedTupleDefinition;
 
 import java.util.Set;
 

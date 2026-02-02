@@ -1,4 +1,4 @@
-package io.github.amusing_glitch.tuple.javac;
+package io.github.amusing_glitch.tuple.javac.scan.result;
 
 public record NamedTupleField(
         int index,

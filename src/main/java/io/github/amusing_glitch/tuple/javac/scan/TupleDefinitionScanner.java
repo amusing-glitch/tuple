@@ -1,4 +1,4 @@
-package io.github.amusing_glitch.tuple.javac;
+package io.github.amusing_glitch.tuple.javac.scan;
 
 import com.sun.source.tree.CompilationUnitTree;
 import com.sun.source.tree.ExpressionTree;
@@ -7,11 +7,14 @@ import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.util.TreePath;
 import com.sun.source.util.TreePathScanner;
 import com.sun.source.util.Trees;
+import io.github.amusing_glitch.tuple.javac.scan.result.NamedTupleDefinition;
+import io.github.amusing_glitch.tuple.javac.scan.result.NamedTupleField;
+import io.github.amusing_glitch.tuple.javac.scan.result.NumberedTupleDefinition;
+import io.github.amusing_glitch.tuple.javac.scan.result.TupleDefinitionScanResult;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.PrimitiveType;
-import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import java.util.*;
@@ -20,17 +23,11 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static io.github.amusing_glitch.tuple.dynamic.templates.JavaTemplate.typeReferenceFieldName;
-import static io.github.amusing_glitch.tuple.processors.SupportedTupleDefinitions.NAMED_TUPLE_FACTORY_METHOD_SPEC;
-import static io.github.amusing_glitch.tuple.processors.SupportedTupleDefinitions.NAMED_TUPLE_ZIP_METHOD_SPEC;
+import static io.github.amusing_glitch.tuple.javac.scan.SupportedTupleDefinitions.NAMED_TUPLE_FACTORY_METHOD_SPEC;
+import static io.github.amusing_glitch.tuple.javac.scan.SupportedTupleDefinitions.NAMED_TUPLE_ZIP_METHOD_SPEC;
 
 
 public class TupleDefinitionScanner {
-    private final boolean fetchTypes;
-
-    public TupleDefinitionScanner(boolean fetchTypes) {
-        this.fetchTypes = fetchTypes;
-    }
-
     public TupleDefinitionScanResult scan(
             Set<TupleDefinitionSpec> tupleDefinitionSpecs,
             Trees trees,
@@ -181,10 +178,9 @@ public class TupleDefinitionScanner {
                         importTree.isStatic()
                 )).collect(Collectors.toSet());
     }
+
+    private record ImportStatement(
+            String identifier,
+            boolean isStatic
+    ) {}
 }
-
-record ImportStatement(
-        String identifier,
-        boolean isStatic
-) {}
-

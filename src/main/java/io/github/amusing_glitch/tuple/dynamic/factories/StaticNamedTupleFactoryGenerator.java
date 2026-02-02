@@ -2,8 +2,7 @@ package io.github.amusing_glitch.tuple.dynamic.factories;
 
 import io.github.amusing_glitch.tuple.dynamic.templates.JavaTemplate;
 import io.github.amusing_glitch.tuple.dynamic.templates.PebbleTemplateProcessor;
-import io.github.amusing_glitch.tuple.javac.NamedTupleDefinition;
-import io.github.amusing_glitch.tuple.javac.NamedTupleField;
+import io.github.amusing_glitch.tuple.javac.scan.result.NamedTupleField;
 
 import java.io.IOException;
 import java.util.Comparator;

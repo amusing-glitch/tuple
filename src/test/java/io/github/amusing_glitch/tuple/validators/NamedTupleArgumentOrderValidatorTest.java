@@ -1,9 +1,9 @@
 package io.github.amusing_glitch.tuple.validators;
 
 
-import io.github.amusing_glitch.tuple.javac.NamedTupleDefinition;
-import io.github.amusing_glitch.tuple.javac.NamedTupleField;
-import io.github.amusing_glitch.tuple.javac.TupleDefinitionScanResult;
+import io.github.amusing_glitch.tuple.javac.scan.result.NamedTupleDefinition;
+import io.github.amusing_glitch.tuple.javac.scan.result.NamedTupleField;
+import io.github.amusing_glitch.tuple.javac.scan.result.TupleDefinitionScanResult;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;
