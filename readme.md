@@ -1,5 +1,6 @@
 # io.github.amusing_glitch.tuple
 Creates "Strongly Typed" Tuples with variable lengths in the compile time.
+Maven Central: https://central.sonatype.com/artifact/io.github.amusing-glitch/tuple
 
 ## Use case
 In java different types are aggregated together only by classes.
