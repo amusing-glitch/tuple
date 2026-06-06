@@ -78,9 +78,12 @@ public class TupleDefinitionScanner {
 
             private boolean isTargetMethod(TupleDefinitionSpec expectedSpec, MethodInvocationTree node) {
                 String caller = node.getMethodSelect().toString();
-                if (caller.startsWith(expectedSpec.completeClassName() + "." + expectedSpec.methodName())) {
+                String qualifiedMethod = expectedSpec.completeClassName() + "." + expectedSpec.methodName();
+                String unqualifiedMethod = expectedSpec.className() + "." + expectedSpec.methodName();
+
+                if (caller.equals(qualifiedMethod) || caller.startsWith(qualifiedMethod + "(")) {
                     return true;
-                } else if (caller.startsWith(expectedSpec.className() + "." + expectedSpec.methodName())) {
+                } else if (caller.equals(unqualifiedMethod) || caller.startsWith(unqualifiedMethod + "(")) {
                     return imports.stream()
                             .anyMatch(importStatement ->
                                     !importStatement.isStatic() &&
@@ -89,13 +92,13 @@ public class TupleDefinitionScanner {
                                                     Objects.equals(importStatement.identifier(), expectedSpec.completeClassName())
                                             )
                             );
-                } else if (caller.startsWith(expectedSpec.methodName())) {
+                } else if (caller.equals(expectedSpec.methodName()) || caller.startsWith(expectedSpec.methodName() + "(")) {
                     return imports.stream()
                             .anyMatch(importStatement ->
                                     importStatement.isStatic() &&
                                             (
                                                     Objects.equals(importStatement.identifier(), expectedSpec.completeClassName() + ".*") ||
-                                                    Objects.equals(importStatement.identifier(), expectedSpec.completeClassName() + "." + caller)
+                                                    Objects.equals(importStatement.identifier(), expectedSpec.completeClassName() + "." + expectedSpec.methodName())
                                             )
                             );
                 } else {
