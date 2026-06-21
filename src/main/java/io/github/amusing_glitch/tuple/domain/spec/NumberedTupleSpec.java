@@ -1,6 +1,6 @@
 package io.github.amusing_glitch.tuple.domain.spec;
 
-import io.github.amusing_glitch.tuple.domain.definition.NumberedTupleDefinition;
+import io.github.amusing_glitch.tuple.domain.definition.basic.BasicNumberedTupleDefinition;
 import io.github.amusing_glitch.tuple.domain.javac.signature.MethodNomenclature;
 import io.github.amusing_glitch.tuple.domain.javac.signature.Signature;
 import io.github.amusing_glitch.tuple.domain.javac.signature.argument.Argument;
@@ -9,7 +9,7 @@ import io.github.amusing_glitch.tuple.dynamic.templates.JavaTemplate;
 
 import java.util.List;
 
-public class NumberedTupleSpec extends TupleSpec<NumberedTupleDefinition> {
+public class NumberedTupleSpec extends TupleSpec<BasicNumberedTupleDefinition> {
     private static final MethodNomenclature targetMethodNomenclature = new MethodNomenclature(
             JavaTemplate.packageName,
             JavaTemplate.dynamicTupleClassName,
@@ -27,8 +27,8 @@ public class NumberedTupleSpec extends TupleSpec<NumberedTupleDefinition> {
     }
 
     @Override
-    public NumberedTupleDefinition process(Signature signature) {
-        return new NumberedTupleDefinition(
+    public BasicNumberedTupleDefinition process(Signature signature) {
+        return new BasicNumberedTupleDefinition(
                 JavaTemplate.packageName,
                 JavaTemplate.className(signature.arguments().size()),
                 signature.arguments().size(),

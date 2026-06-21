@@ -1,6 +1,9 @@
 package io.github.amusing_glitch.tuple.domain.spec;
 
-import io.github.amusing_glitch.tuple.domain.type.TypeInfo;
+import io.github.amusing_glitch.tuple.domain.definition.field.typed.TypedFieldDefinition;
+import io.github.amusing_glitch.tuple.domain.javac.signature.Signature;
+import io.github.amusing_glitch.tuple.domain.javac.signature.argument.typed.TypedArgument;
 import io.github.amusing_glitch.tuple.domain.definition.TupleDefinition;
 
-public abstract class TypedTupleSpec<T extends TupleDefinition & TypeInfo> extends TupleSpec<T> {}
+public interface TypedTupleSpec<S extends Signature<TypedArgument>, T extends TupleDefinition<TypedFieldDefinition>> extends TupleSpec<S, T> {
+}

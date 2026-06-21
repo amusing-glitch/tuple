@@ -1,10 +1,6 @@
 package io.github.amusing_glitch.tuple.domain.definition;
 
-import java.util.List;
+import io.github.amusing_glitch.tuple.domain.definition.field.NamedFieldDefinition;
 
-public record NamedTupleDefinition(
-        String packageName,
-        String name,
-        List<NamedFieldDefinition> fieldDefinitions,
-        Object node
-) implements TupleDefinition {}
+public interface NamedTupleDefinition<F extends NamedFieldDefinition> extends TupleDefinition<F> {
+}

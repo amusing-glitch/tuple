@@ -1,9 +1,15 @@
 package io.github.amusing_glitch.tuple.domain.definition;
 
-public interface TupleDefinition {
+import io.github.amusing_glitch.tuple.domain.definition.field.FieldDefinition;
+
+import java.util.List;
+
+public interface TupleDefinition<F extends FieldDefinition> {
     String packageName();
 
     String name();
 
     Object node();
+
+    List<F> fieldDefinitions();
 }
