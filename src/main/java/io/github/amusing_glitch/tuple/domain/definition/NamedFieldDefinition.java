@@ -4,5 +4,6 @@ import java.util.Optional;
 
 public record NamedFieldDefinition(
         String name,
-        Optional<String> type
+        Optional<String> type,
+        Object node
 ) {}

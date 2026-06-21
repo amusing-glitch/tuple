@@ -6,7 +6,6 @@ import java.util.Optional;
 
 public record LambdaArgument(
         String name,
-        Optional<Type> type
-) implements Argument {
-
-}
+        Optional<Type> type,
+        Object node
+) implements Argument { }

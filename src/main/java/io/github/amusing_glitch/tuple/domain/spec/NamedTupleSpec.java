@@ -41,7 +41,8 @@ public class NamedTupleSpec extends TupleSpec<NamedTupleDefinition> {
                 .map(it ->
                         new NamedFieldDefinition(
                                 it.name(),
-                                it.type().map(Type::value)
+                                it.type().map(Type::value),
+                                it.node()
                         )
                 ).toList();
 

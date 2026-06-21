@@ -54,7 +54,8 @@ public class NamedStreamZip extends TupleExtensionSpec<NamedTupleDefinition> {
                                 it.type()
                                         .map(Type::innerType)
                                         .map(Optional::orElseThrow)
-                                        .map(Type::value)
+                                        .map(Type::value),
+                                it.node()
                         )
                 ).toList();
 
