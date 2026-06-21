@@ -1,4 +1,4 @@
-package io.github.amusing_glitch.tuple.domain.javac.signature;
+package io.github.amusing_glitch.tuple.domain.type;
 
 import java.util.Optional;
 

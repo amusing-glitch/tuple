@@ -4,9 +4,9 @@ import io.github.amusing_glitch.tuple.domain.codeGenerator.TupleExtensionGenerat
 import io.github.amusing_glitch.tuple.domain.definition.NumberedTupleDefinition;
 import io.github.amusing_glitch.tuple.domain.javac.signature.MethodNomenclature;
 import io.github.amusing_glitch.tuple.domain.javac.signature.Signature;
-import io.github.amusing_glitch.tuple.domain.javac.signature.Type;
 import io.github.amusing_glitch.tuple.domain.javac.signature.argument.Argument;
 import io.github.amusing_glitch.tuple.domain.javac.signature.argument.SimpleArgument;
+import io.github.amusing_glitch.tuple.domain.javac.signature.argument.typed.TypedSimpleArgument;
 import io.github.amusing_glitch.tuple.domain.spec.TupleExtensionSpec;
 import io.github.amusing_glitch.tuple.domainExtension.stream.codeGenerator.NumberedStreamExtensionGenerator;
 import io.github.amusing_glitch.tuple.dynamic.templates.JavaTemplate;
@@ -32,17 +32,16 @@ public class NumberedStreamZipSpec extends TupleExtensionSpec<NumberedTupleDefin
     }
 
     @Override
-    protected boolean hasMatchingArguments(List<Argument> arguments) {
-        return
-                arguments.stream().allMatch(it -> it instanceof SimpleArgument) &&
+    protected boolean hasMatchingArguments(List<? extends Argument> arguments) {
+        return arguments.stream().allMatch(it -> it instanceof SimpleArgument) &&
                 arguments.stream()
                         .map(it -> (SimpleArgument) it)
-                        .allMatch(it ->
-                                it.type()
-                                        .map(Type::value)
-                                        .map(typeValue -> typeValue.equals("Stream"))
-                                        .orElse(true)
-                        );
+                        .allMatch(it -> {
+                            if (it instanceof TypedSimpleArgument typed) {
+                                return typed.type().value().equals("Stream");
+                            }
+                            return true;
+                        });
     }
 
     @Override

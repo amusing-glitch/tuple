@@ -1,9 +1,6 @@
 package io.github.amusing_glitch.tuple.domain.definition;
 
-import java.util.Optional;
-
-public record NamedFieldDefinition(
-        String name,
-        Optional<String> type,
-        Object node
-) {}
+public sealed interface NamedFieldDefinition permits BasicNamedFieldDefinition, TypedNamedFieldDefinition {
+    String name();
+    Object node();
+}

@@ -1,21 +1,22 @@
 package io.github.amusing_glitch.tuple.domainExtension.stream.spec;
 
 import io.github.amusing_glitch.tuple.domain.codeGenerator.TupleExtensionGenerator;
+import io.github.amusing_glitch.tuple.domain.definition.BasicNamedFieldDefinition;
 import io.github.amusing_glitch.tuple.domain.definition.NamedFieldDefinition;
 import io.github.amusing_glitch.tuple.domain.definition.NamedTupleDefinition;
+import io.github.amusing_glitch.tuple.domain.definition.TypedNamedFieldDefinition;
 import io.github.amusing_glitch.tuple.domain.javac.signature.Signature;
 import io.github.amusing_glitch.tuple.domain.javac.signature.MethodNomenclature;
-import io.github.amusing_glitch.tuple.domain.javac.signature.Type;
 import io.github.amusing_glitch.tuple.domain.javac.signature.argument.Argument;
+import io.github.amusing_glitch.tuple.domain.javac.signature.argument.basic.BasicLambdaArgument;
 import io.github.amusing_glitch.tuple.domain.javac.signature.argument.LambdaArgument;
+import io.github.amusing_glitch.tuple.domain.javac.signature.argument.typed.TypedLambdaArgument;
 import io.github.amusing_glitch.tuple.domain.javac.signature.argument.TypeRefArgument;
 import io.github.amusing_glitch.tuple.domain.spec.TupleExtensionSpec;
 import io.github.amusing_glitch.tuple.domainExtension.stream.codeGenerator.NamedStreamExtensionGenerator;
 import io.github.amusing_glitch.tuple.dynamic.templates.JavaTemplate;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Stream;
 
 public class NamedStreamZip extends TupleExtensionSpec<NamedTupleDefinition> {
     private static final MethodNomenclature targetMethodNomenclature = new MethodNomenclature(
@@ -35,11 +36,9 @@ public class NamedStreamZip extends TupleExtensionSpec<NamedTupleDefinition> {
     }
 
     @Override
-    protected boolean hasMatchingArguments(List<Argument> arguments) {
-        return Stream.of(
-                arguments.stream().findFirst().orElseThrow() instanceof TypeRefArgument,
-                arguments.stream().skip(1).allMatch(it -> it instanceof LambdaArgument)
-        ).reduce(Boolean::logicalAnd).orElseThrow();
+    protected boolean hasMatchingArguments(List<? extends Argument> arguments) {
+        return arguments.stream().findFirst().orElseThrow() instanceof TypeRefArgument &&
+                arguments.stream().skip(1).allMatch(it -> it instanceof LambdaArgument || it instanceof TypedLambdaArgument);
     }
 
     @Override
@@ -48,16 +47,22 @@ public class NamedStreamZip extends TupleExtensionSpec<NamedTupleDefinition> {
         var fields = signature.arguments().stream()
                 .skip(1)
                 .map(it -> (LambdaArgument) it)
-                .map(it ->
-                        new NamedFieldDefinition(
-                                it.name(),
-                                it.type()
-                                        .map(Type::innerType)
-                                        .map(Optional::orElseThrow)
-                                        .map(Type::value),
-                                it.node()
-                        )
-                ).toList();
+                .map(it -> {
+                    if (it instanceof TypedLambdaArgument typed) {
+                        return (NamedFieldDefinition) new TypedNamedFieldDefinition(
+                                typed.name(),
+                                typed.type(),
+                                typed.node()
+                        );
+                    } else if (it instanceof BasicLambdaArgument basic) {
+                        return (NamedFieldDefinition) new BasicNamedFieldDefinition(
+                                basic.name(),
+                                basic.node()
+                        );
+                    }
+                    throw new AssertionError("Exhaustive LambdaArgument match");
+                })
+                .toList();
 
         return new NamedTupleDefinition(
                 JavaTemplate.packageName,

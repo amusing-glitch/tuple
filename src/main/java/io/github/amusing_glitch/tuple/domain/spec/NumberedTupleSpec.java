@@ -22,7 +22,7 @@ public class NumberedTupleSpec extends TupleSpec<NumberedTupleDefinition> {
     }
 
     @Override
-    protected boolean hasMatchingArguments(List<Argument> arguments) {
+    protected boolean hasMatchingArguments(List<? extends Argument> arguments) {
         return arguments.stream().allMatch(it -> it instanceof SimpleArgument);
     }
 

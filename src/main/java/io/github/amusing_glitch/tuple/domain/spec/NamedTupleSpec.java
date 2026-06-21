@@ -1,10 +1,10 @@
 package io.github.amusing_glitch.tuple.domain.spec;
 
+import io.github.amusing_glitch.tuple.domain.definition.BasicNamedFieldDefinition;
 import io.github.amusing_glitch.tuple.domain.definition.NamedFieldDefinition;
 import io.github.amusing_glitch.tuple.domain.definition.NamedTupleDefinition;
 import io.github.amusing_glitch.tuple.domain.javac.signature.MethodNomenclature;
 import io.github.amusing_glitch.tuple.domain.javac.signature.Signature;
-import io.github.amusing_glitch.tuple.domain.javac.signature.Type;
 import io.github.amusing_glitch.tuple.domain.javac.signature.argument.Argument;
 import io.github.amusing_glitch.tuple.domain.javac.signature.argument.LambdaArgument;
 import io.github.amusing_glitch.tuple.domain.javac.signature.argument.TypeRefArgument;
@@ -21,9 +21,8 @@ public class NamedTupleSpec extends TupleSpec<NamedTupleDefinition> {
     );
 
     @Override
-    public boolean hasMatchingArguments(List<Argument> arguments) {
-        return
-                arguments.stream().findFirst().orElseThrow() instanceof TypeRefArgument &&
+    public boolean hasMatchingArguments(List<? extends Argument> arguments) {
+        return arguments.stream().findFirst().orElseThrow() instanceof TypeRefArgument &&
                 arguments.stream().skip(1).allMatch(it -> it instanceof LambdaArgument);
     }
 
@@ -33,18 +32,14 @@ public class NamedTupleSpec extends TupleSpec<NamedTupleDefinition> {
     }
 
     @Override
-    public NamedTupleDefinition process(Signature signature) {
-        String tupleClassName = ((TypeRefArgument) signature.arguments().stream().findFirst().orElseThrow()).name();
+    public NamedTupleDefinition process(Signature<?> signature) {
+        TypeRefArgument typeRefArg = (TypeRefArgument) signature.arguments().stream().findFirst().orElseThrow();
+        String tupleClassName = typeRefArg.name();
         var fields = signature.arguments().stream()
                 .skip(1)
                 .map(it -> (LambdaArgument) it)
-                .map(it ->
-                        new NamedFieldDefinition(
-                                it.name(),
-                                it.type().map(Type::value),
-                                it.node()
-                        )
-                ).toList();
+                .map(it -> (NamedFieldDefinition) new BasicNamedFieldDefinition(it.name(), it.node()))
+                .toList();
 
         return new NamedTupleDefinition(
                 JavaTemplate.packageName,

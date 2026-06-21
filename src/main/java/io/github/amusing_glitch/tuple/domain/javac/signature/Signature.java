@@ -4,8 +4,8 @@ import io.github.amusing_glitch.tuple.domain.javac.signature.argument.Argument;
 
 import java.util.List;
 
-public record Signature(
-        MethodNomenclature methodNomenclature,
-        List<Argument> arguments,
-        Object node
-) {}
+public interface Signature<T extends Argument> {
+    MethodNomenclature methodNomenclature();
+    List<T> arguments();
+    Object node();
+}
